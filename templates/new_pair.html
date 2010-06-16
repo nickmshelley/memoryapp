@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css" />
+{% endblock head %}
+
+{% block content %}
+	<form action="/add-pair" method="post">
+		<p>Question</p>
+		<p><input type="text" name="question" /></p>
+		<p>Answer</p>
+		<p><textarea name="answer"></textarea></p>
+		<p><input type="hidden" name="category" value="{{ category_key }}" /></p>
+		<p><input type="submit" value="Add" /></p>
+	</form>
+{% endblock content %}

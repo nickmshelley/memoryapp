@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css" />
+{% endblock head %}
+
+{% block content %}
+	<form action="/add-category" method="post">
+		<p>Name</p>
+		<p><input type="text" name="name" /></p>
+		<p>Description</p>
+		<p><textarea name="description"></textarea></p>
+		<p><input type="submit" value="Add" /></p>
+	</form>
+{% endblock content %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css" />
+{% endblock head %}
+
+{% block nav %}
+	<p><a href="/new-pair?category={{ category_key }}">New Card</a></p>
+{% endblock nav %}
+
+{% block content %}
+	{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+	<table border="1">
+		<tr>
+			<td>Question</td>
+			<td>Answer</td>
+			<td>User</td>
+		</tr>
+		{% for pair in pairs %}
+		<tr>
+			<td>{{ pair.question }}</td>
+			<td>{{ pair.answer }}</td>
+			<td>{{ pair.owner }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock content %}

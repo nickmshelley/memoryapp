@@ -79,6 +79,7 @@ def reset_pairs(categoryKey):
 		pairs = pairsQuery.fetch(1000)
 	if not changed:
 		pairsQuery = category.pairs.filter('state =', 'correct')
+		pairs = pairsQuery.fetch(1000)
 		while len(pairs) > 0:
 			changed = True
 			for pair in pairs:

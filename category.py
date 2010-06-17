@@ -18,7 +18,7 @@ class Category(db.Model):
 	
 	@property
 	def pairs(self):
-		return Pair.gql("WHERE categories = :1", self.key())
+		return Pair.all().filter('categories =', self.key())
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):

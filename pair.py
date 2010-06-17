@@ -36,6 +36,7 @@ class AddPairAction(webapp.RequestHandler):
 		pair = Pair(owner = users.get_current_user())
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
+		pair.state = db.Category("ready")
 		pair.categories.append(db.Key(category_key))
 		pair.put()
 		self.redirect('/category?id=' + category_key)

@@ -39,9 +39,11 @@ class CategoryPage(webapp.RequestHandler):
 			pairsQuery = category.pairs
 			pairsQuery.filter('state =', 'ready')
 			pairs = pairsQuery.fetch(1)
-			pair = pairs[0]
+			if len(pairs) == 0:
+				reset_pairs(categoryKey)
+				pairs = pairsQuery.fetch(1)
 			
-		self.response.out.write(template.render(path, {'pair': pair,
+		self.response.out.write(template.render(path, {'pairs': pairs,
 														'category_key': categoryKey,
 														'logout': logout,
 														'error_message': error_message
@@ -64,3 +66,22 @@ class AddCategoryAction(webapp.RequestHandler):
 		category.put()
 		self.redirect('/')
 
+def reset_pairs(categoryKey):
+	category = db.get(categoryKey)
+	pairsQuery = category.pairs.filter('state =', 'missed')
+	pairs = pairsQuery.fetch(1000)
+	changed = False
+	while len(pairs) > 0:
+		changed = True
+		for pair in pairs:
+			pair.state = 'ready'
+			pair.put()
+		pairs = pairsQuery.fetch(1000)
+	if not changed:
+		pairsQuery = category.pairs.filter('state =', 'correct')
+		while len(pairs) > 0:
+			changed = True
+			for pair in pairs:
+				pair.state = 'ready'
+				pair.put()
+			pairs = pairsQuery.fetch(1000)

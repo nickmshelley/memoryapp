@@ -41,5 +41,16 @@ class AddPairAction(webapp.RequestHandler):
 		pair.put()
 		self.redirect('/category?id=' + category_key)
 
+class UpdatePairAction(webapp.RequestHandler):
+	def post(self):
+		pair_key = self.request.get('pair')
+		state = self.request.get('state')
+		#print state
+		category_key = self.request.get('category')
+		pair = db.get(pair_key)		
+		pair.state = state
+		pair.put()
+		self.redirect('/category?id=' + category_key)
+
 #hack to fix circular import
 from category import *

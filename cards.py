@@ -29,6 +29,7 @@ application = webapp.WSGIApplication(
 									('/new-pair', NewPairForm),
 									('/add-pair', AddPairAction),
 									('/category', CategoryPage),
+									('/update-pair', UpdatePairAction),
 									],
 									debug=True)
 

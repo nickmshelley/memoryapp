@@ -37,8 +37,11 @@ class CategoryPage(webapp.RequestHandler):
 			error_message = "You do not own this category"
 		else:
 			pairsQuery = category.pairs
-			pairs = pairsQuery.fetch(10)
-		self.response.out.write(template.render(path, {'pairs': pairs,
+			pairsQuery.filter('state =', 'ready')
+			pairs = pairsQuery.fetch(1)
+			pair = pairs[0]
+			
+		self.response.out.write(template.render(path, {'pair': pair,
 														'category_key': categoryKey,
 														'logout': logout,
 														'error_message': error_message

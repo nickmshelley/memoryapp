@@ -10,18 +10,8 @@
 
 {% block content %}
 	{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-	<table border="1">
-		<tr>
-			<td>Question</td>
-			<td>Answer</td>
-			<td>User</td>
-		</tr>
-		{% for pair in pairs %}
-		<tr>
-			<td>{{ pair.question }}</td>
-			<td>{{ pair.answer }}</td>
-			<td>{{ pair.owner }}</td>
-		</tr>
-		{% endfor %}
-	</table>
+	<p><em>Question:</em></p>
+	<p>{{ pair.question }}</p>
+	<p><em>Answer:</em></p>
+	<p>{{ pair.answer }}</p>
 {% endblock content %}

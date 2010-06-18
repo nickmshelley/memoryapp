@@ -31,6 +31,7 @@ class CategoryPage(webapp.RequestHandler):
 		error_message = None
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
+		pair = None
 		if not category:
 			error_message = "Category does not exist"
 		elif category.owner != user:
@@ -42,8 +43,10 @@ class CategoryPage(webapp.RequestHandler):
 			if len(pairs) == 0:
 				reset_pairs(categoryKey)
 				pairs = pairsQuery.fetch(1)
+			if len(pairs) > 0:
+				pair = pairs[0]
 			
-		self.response.out.write(template.render(path, {'pairs': pairs,
+		self.response.out.write(template.render(path, {'pair': pair,
 														'category_key': categoryKey,
 														'logout': logout,
 														'error_message': error_message

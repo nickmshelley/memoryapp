@@ -10,23 +10,21 @@
 
 {% block content %}
 	{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-	{% for pair in pairs %}
-		<p><em>Question:</em></p>
-		<p>{{ pair.question }}</p>
-		<p><em>Answer:</em></p>
-		<p>{{ pair.answer }}</p>
-	{% endfor %}
+	<p><em>Question:</em></p>
+	<p>{{ pair.question }}</p>
+	<p><em>Answer:</em></p>
+	<p>{{ pair.answer }}</p>
 	
-	{% if pairs|length %}
+	{% if pair %}
 		<p>
 		<form action="/update-pair" method="post">
-			<input type="hidden" name="pair" value="{{ pairs.0.key }}" />
+			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="correct" />
 			<input type="hidden" name="category" value="{{ category_key }}" />
 		<input type="submit" value="Correct" />
 		</form>
 		<form action="/update-pair" method="post">
-			<input type="hidden" name="pair" value="{{ pairs.0.key }}" />
+			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="missed" />
 			<input type="hidden" name="category" value="{{ category_key }}" />
 		<input type="submit" value="Missed" />

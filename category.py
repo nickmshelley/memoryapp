@@ -3,6 +3,7 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 import os
+import random
 
 from pair import *
 
@@ -39,12 +40,13 @@ class CategoryPage(webapp.RequestHandler):
 		else:
 			pairsQuery = category.pairs
 			pairsQuery.filter('state =', 'ready')
-			pairs = pairsQuery.fetch(1)
+			pairs = pairsQuery.fetch(1000)
 			if len(pairs) == 0:
 				reset_pairs(categoryKey)
-				pairs = pairsQuery.fetch(1)
+				pairs = pairsQuery.fetch(1000)
 			if len(pairs) > 0:
-				pair = pairs[0]
+				index = random.randint(0, len(pairs) - 1)
+				pair = pairs[index]
 			
 		self.response.out.write(template.render(path, {'pair': pair,
 														'category_key': categoryKey,

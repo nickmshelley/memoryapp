@@ -8,8 +8,10 @@ from category import *
 
 class MainPage(webapp.RequestHandler):
 	def get(self):
-		category_query = Category.all().order('name')
-		categories = category_query.fetch(10)
+		user = users.get_current_user()
+		categoryQuery = Category.all().order('name')
+		categoryQuery.filter('owner =', user)
+		categories = categoryQuery.fetch(10)
 		
 		logout = users.create_logout_url(self.request.uri)
 		

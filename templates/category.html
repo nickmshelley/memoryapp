@@ -13,10 +13,13 @@
 	<p><em>Question:</em></p>
 	<p>{{ pair.question }}</p>
 	<p><em>Answer:</em></p>
-	<p>{{ pair.answer }}</p>
+	{% if show_answer %}
+		<p>{{ pair.answer }}</p>
+	{% endif %}
 	
 	{% if pair %}
 		<p>
+		<a href="/category?id={{ category_key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="correct" />

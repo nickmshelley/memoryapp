@@ -27,8 +27,9 @@ class CategoryPage(webapp.RequestHandler):
 	
 		user = users.get_current_user()
 		categoryKey = self.request.get('id')
+		pairKey = self.request.get('pair')
+		showAnswer = self.request.get('show-answer')
 		category = db.get(categoryKey)
-		#print category.name
 		error_message = None
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
@@ -40,18 +41,22 @@ class CategoryPage(webapp.RequestHandler):
 		else:
 			pairsQuery = category.pairs
 			pairsQuery.filter('state =', 'ready')
-			pairs = pairsQuery.fetch(1000)
-			if len(pairs) == 0:
-				reset_pairs(categoryKey)
+			if pairKey:
+				pair = db.get(pairKey)
+			else:
 				pairs = pairsQuery.fetch(1000)
-			if len(pairs) > 0:
-				index = random.randint(0, len(pairs) - 1)
-				pair = pairs[index]
+				if len(pairs) == 0:
+					reset_pairs(categoryKey)
+					pairs = pairsQuery.fetch(1000)
+				if len(pairs) > 0:
+					index = random.randint(0, len(pairs) - 1)
+					pair = pairs[index]
 			
 		self.response.out.write(template.render(path, {'pair': pair,
 														'category_key': categoryKey,
+														'show_answer': showAnswer,
 														'logout': logout,
-														'error_message': error_message
+														'error_message': error_message,
 														}))
 
 class NewCategoryForm(webapp.RequestHandler):

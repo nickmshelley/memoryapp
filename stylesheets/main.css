@@ -1,0 +1,8 @@
+p.counts span {
+	padding-right: 30px;
+}
+
+div.buttons form, div.buttons a {
+	display: inline;
+	padding-right: 30px;
+}

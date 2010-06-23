@@ -13,9 +13,11 @@ class Category(db.Model):
 	description = db.TextProperty()
 	
 	# Category meta information
-	size = db.IntegerProperty()
-	missed = db.IntegerProperty()
-	correct = db.IntegerProperty()
+	size = db.IntegerProperty(default=0)
+	missed = db.IntegerProperty(default=0)
+	correct = db.IntegerProperty(default=0)
+	remaining = db.IntegerProperty(default=0)
+	error = db.IntegerProperty(default = 0)
 	
 	@property
 	def pairs(self):
@@ -26,10 +28,10 @@ class CategoryPage(webapp.RequestHandler):
 		logout = users.create_logout_url(self.request.uri)
 	
 		user = users.get_current_user()
-		categoryKey = self.request.get('id')
+		category_key = self.request.get('id')
 		pairKey = self.request.get('pair')
 		showAnswer = self.request.get('show-answer')
-		category = db.get(categoryKey)
+		category = db.get(category_key)
 		error_message = None
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
@@ -46,14 +48,15 @@ class CategoryPage(webapp.RequestHandler):
 			else:
 				pairs = pairsQuery.fetch(1000)
 				if len(pairs) == 0:
-					reset_pairs(categoryKey)
+					reset_pairs(category_key)
 					pairs = pairsQuery.fetch(1000)
+					category = db.get(category_key)
 				if len(pairs) > 0:
 					index = random.randint(0, len(pairs) - 1)
 					pair = pairs[index]
 			
 		self.response.out.write(template.render(path, {'pair': pair,
-														'category_key': categoryKey,
+														'category': category,
 														'show_answer': showAnswer,
 														'logout': logout,
 														'error_message': error_message,
@@ -81,18 +84,26 @@ def reset_pairs(categoryKey):
 	pairsQuery = category.pairs.filter('state =', 'missed')
 	pairs = pairsQuery.fetch(1000)
 	changed = False
+	category.remaining = 0
 	while len(pairs) > 0:
 		changed = True
+		category.remaining += len(pairs)
 		for pair in pairs:
 			pair.state = 'ready'
 			pair.put()
 		pairs = pairsQuery.fetch(1000)
-	if not changed:
+	if changed:
+		category.missed = 0
+		category.put()
+	else:
 		pairsQuery = category.pairs.filter('state =', 'correct')
 		pairs = pairsQuery.fetch(1000)
 		while len(pairs) > 0:
 			changed = True
+			category.remaining = len(pairs)
 			for pair in pairs:
 				pair.state = 'ready'
 				pair.put()
 			pairs = pairsQuery.fetch(1000)
+		category.correct = 0
+		category.put()

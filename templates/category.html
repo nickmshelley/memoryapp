@@ -5,7 +5,7 @@
 {% endblock head %}
 
 {% block nav %}
-	<p><a href="/new-pair?category={{ category_key }}">New Card</a></p>
+	<p><a href="/new-pair?category={{ category.key }}">New Card</a></p>
 {% endblock nav %}
 
 {% block content %}
@@ -16,21 +16,28 @@
 	{% if show_answer %}
 		<p>{{ pair.answer }}</p>
 	{% endif %}
+	<p class="counts">
+		<span>Total: {{ category.size }}</span>
+		<span>Remaining: {{category.remaining }}</span>
+		<span>Correct: {{ category.correct }}</span>
+		<span>Missed: {{ category.missed }}</span>
+	</p>
 	
 	{% if pair %}
-		<p>
-		<a href="/category?id={{ category_key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
+	<div class="buttons">
+		<a href="/category?id={{ category.key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="correct" />
-			<input type="hidden" name="category" value="{{ category_key }}" />
+			<input type="hidden" name="category" value="{{ category.key }}" />
 		<input type="submit" value="Correct" />
 		</form>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="missed" />
-			<input type="hidden" name="category" value="{{ category_key }}" />
+			<input type="hidden" name="category" value="{{ category.key }}" />
 		<input type="submit" value="Missed" />
 		</form>
+	</div>
 	{% endif %}
 {% endblock content %}

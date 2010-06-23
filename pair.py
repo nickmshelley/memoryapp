@@ -39,17 +39,31 @@ class AddPairAction(webapp.RequestHandler):
 		pair.state = db.Category("ready")
 		pair.categories.append(db.Key(category_key))
 		pair.put()
+		category = db.get(category_key)
+		category.size += 1
+		category.remaining += 1
+		category.put()
 		self.redirect('/category?id=' + category_key)
 
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
-		#print state
 		category_key = self.request.get('category')
 		pair = db.get(pair_key)		
 		pair.state = state
 		pair.put()
+		
+		#update category meta information
+		category = db.get(category_key)
+		if state == 'missed':
+			category.missed += 1
+		elif state == 'correct':
+			category.correct += 1
+		else:
+			category.error += 1
+		category.remaining -= 1	
+		category.put()
 		self.redirect('/category?id=' + category_key)
 
 #hack to fix circular import

@@ -30,14 +30,21 @@
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="correct" />
 			<input type="hidden" name="category" value="{{ category.key }}" />
-		<input type="submit" value="Correct" />
+			<input type="submit" value="Correct" />
 		</form>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="missed" />
 			<input type="hidden" name="category" value="{{ category.key }}" />
-		<input type="submit" value="Missed" />
+			<input type="submit" value="Missed" />
 		</form>
+		{% if not pair.reviewing %}
+		<form action="/mark-review" method="post">
+			<input type="hidden" name="pair" value="{{ pair.key }}" />
+			<input type="hidden" name="category" value="{{ category.key }}" />
+			<input type="submit" value="Add to Review"
+		</form>
+		{% endif %}
 	</div>
 	{% endif %}
 {% endblock content %}

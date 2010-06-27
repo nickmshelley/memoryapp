@@ -74,7 +74,13 @@ class MarkReviewAction(webapp.RequestHandler):
 		pair = db.get(pair_key)
 		pair.reviewing = True
 		pair.firstSuccess = datetime.date.today()
+		pair.numSuccesses = 1
+		pair.state = 'correct'
 		pair.put()
+		category = db.get(category_key)
+		category.correct += 1
+		category.remaining -= 1
+		category.put()
 		self.redirect('/category?id=' + category_key)
 
 #hack to fix circular import

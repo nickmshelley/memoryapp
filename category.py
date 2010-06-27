@@ -100,7 +100,7 @@ def reset_pairs(categoryKey):
 		pairs = pairsQuery.fetch(1000)
 		while len(pairs) > 0:
 			changed = True
-			category.remaining = len(pairs)
+			category.remaining += len(pairs)
 			for pair in pairs:
 				pair.state = 'ready'
 				pair.put()

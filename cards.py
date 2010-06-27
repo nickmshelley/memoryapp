@@ -32,7 +32,7 @@ application = webapp.WSGIApplication(
 									('/add-pair', AddPairAction),
 									('/category', CategoryPage),
 									('/update-pair', UpdatePairAction),
-									#('/mark-review', MarkReviewAction),
+									('/mark-review', MarkReviewAction),
 									],
 									debug=True)
 

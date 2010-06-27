@@ -3,6 +3,7 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 import os
+import datetime
 
 class Pair(db.Model):
 	owner = db.UserProperty(required = True)
@@ -64,6 +65,16 @@ class UpdatePairAction(webapp.RequestHandler):
 			category.error += 1
 		category.remaining -= 1	
 		category.put()
+		self.redirect('/category?id=' + category_key)
+
+class MarkReviewAction(webapp.RequestHandler):
+	def post(self):
+		pair_key = self.request.get('pair')
+		category_key = self.request.get('category')
+		pair = db.get(pair_key)
+		pair.reviewing = True
+		pair.firstSuccess = datetime.date.today()
+		pair.put()
 		self.redirect('/category?id=' + category_key)
 
 #hack to fix circular import

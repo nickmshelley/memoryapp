@@ -20,8 +20,31 @@ class Category(db.Model):
 	error = db.IntegerProperty(default = 0)
 	
 	@property
-	def pairs(self):
-		return Pair.all().filter('categories =', self.key())
+	def allPairs(self):
+		query = Pair.all().filter('categories =', self.key())
+		pairs = query.fetch(1000)
+		return pairs
+	
+	@property
+	def readyPairs(self):
+		query = Pair.all().filter('categories =', self.key())
+		query.filter('state =', 'ready')
+		pairs = query.fetch(1000)
+		return pairs
+	
+	@property
+	def missedPairs(self):
+		query = Pair.all().filter('categories =', self.key())
+		query.filter('state =', 'missed')
+		pairs = query.fetch(1000)
+		return pairs
+	
+	@property
+	def correctPairs(self):
+		query = Pair.all().filter('categories =', self.key())
+		query.filter('state =', 'correct')
+		pairs = query.fetch(1000)
+		return pairs
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):
@@ -41,16 +64,18 @@ class CategoryPage(webapp.RequestHandler):
 		elif category.owner != user:
 			error_message = "You do not own this category"
 		else:
-			pairsQuery = category.pairs
-			pairsQuery.filter('state =', 'ready')
 			if pairKey:
 				pair = db.get(pairKey)
 			else:
-				pairs = pairsQuery.fetch(1000)
+				pairs = category.readyPairs
 				if len(pairs) == 0:
 					reset_pairs(category_key)
-					pairs = pairsQuery.fetch(1000)
+					pairs = category.readyPairs
+					
+					# get updated meta information
 					category = db.get(category_key)
+					
+				#make sure there are pairs in the category (avoid out of bounds error)	
 				if len(pairs) > 0:
 					index = random.randint(0, len(pairs) - 1)
 					pair = pairs[index]
@@ -81,8 +106,7 @@ class AddCategoryAction(webapp.RequestHandler):
 
 def reset_pairs(categoryKey):
 	category = db.get(categoryKey)
-	pairsQuery = category.pairs.filter('state =', 'missed')
-	pairs = pairsQuery.fetch(1000)
+	pairs = category.missedPairs
 	changed = False
 	category.remaining = 0
 	while len(pairs) > 0:
@@ -91,19 +115,18 @@ def reset_pairs(categoryKey):
 		for pair in pairs:
 			pair.state = 'ready'
 			pair.put()
-		pairs = pairsQuery.fetch(1000)
+		pairs = category.missedPairs
 	if changed:
 		category.missed = 0
 		category.put()
 	else:
-		pairsQuery = category.pairs.filter('state =', 'correct')
-		pairs = pairsQuery.fetch(1000)
+		pairs = category.correctPairs
 		while len(pairs) > 0:
 			changed = True
 			category.remaining = len(pairs)
 			for pair in pairs:
 				pair.state = 'ready'
 				pair.put()
-			pairs = pairsQuery.fetch(1000)
+			pairs = category.correctPairs
 		category.correct = 0
 		category.put()

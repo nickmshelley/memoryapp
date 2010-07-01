@@ -17,7 +17,7 @@
 		<p>{{ pair.answer }}</p>
 	{% endif %}
 	<p class="counts">
-		<span>Total: {{ category.size }}</span>
+		<span>Total: {{ category.total }}</span>
 		<span>Remaining: {{category.remaining }}</span>
 		<span>Correct: {{ category.correct }}</span>
 		<span>Missed: {{ category.missed }}</span>
@@ -42,9 +42,14 @@
 		<form action="/mark-review" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="category" value="{{ category.key }}" />
-			<input type="submit" value="Add to Review Schedule"
+			<input type="submit" value="Add to Review Schedule" />
 		</form>
 		{% endif %}
 	</div>
+	
+	<form action="/set-reviewing" method="post">
+		<input type="hidden" name="category" value="{{ category.key }}" />
+		<input type="submit" value="Review Category" />
+	</form>
 	{% endif %}
 {% endblock content %}

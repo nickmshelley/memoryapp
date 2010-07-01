@@ -14,14 +14,21 @@ class Category(db.Model):
 	
 	# Category meta information
 	size = db.IntegerProperty(default=0)
+	total = db.IntegerProperty(default=0)
 	missed = db.IntegerProperty(default=0)
 	correct = db.IntegerProperty(default=0)
 	remaining = db.IntegerProperty(default=0)
 	error = db.IntegerProperty(default = 0)
 	
+	reviewing = db.BooleanProperty(default=False)
+	
 	@property
 	def pairs(self):
-		return Pair.all().filter('categories =', self.key())
+		if reviewing:
+			query = 
+		else:
+			query = Pair.all().filter('categories =', self.key())
+		return query
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):
@@ -78,6 +85,14 @@ class AddCategoryAction(webapp.RequestHandler):
 		category.description = self.request.get('description')
 		category.put()
 		self.redirect('/')
+
+class SetReviewingAction(webapp.RequestHandler):
+	def post(self):
+		category_key = self.request.get('category')
+		category = db.get(category_key)
+		category.reviewing = True
+		category.put()
+		self.redirect('/category?id=' + category_key)
 
 def reset_pairs(categoryKey):
 	category = db.get(categoryKey)

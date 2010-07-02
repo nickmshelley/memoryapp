@@ -4,6 +4,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.api import users
 import os
 import random
+import datetime
 
 from pair import *
 
@@ -48,6 +49,68 @@ class Category(db.Model):
 		query.filter('state =', 'correct')
 		pairs = query.fetch(1000)
 		return pairs
+	
+	@property
+	def allReviewPairs(self):
+		pairs = self.dailyReviewPairs + \
+				self.weeklyReviewPairs + \
+				self.monthlyReviewPairs + \
+				self.yearlyReviewPairs
+		return pairs
+	
+	@property
+	def readyReviewPairs(self):
+		allPairs = self.allReviewPairs
+		pairs = filter(lambda p: p.state == 'ready')
+		return pairs
+	
+	@property
+	def missedReviewPairs(self):
+		allPairs = self.allReviewPairs
+		pairs = filter(lambda p: p.state == 'missed')
+		return pairs
+	
+	@property
+	def correctReviewPairs(self):
+		allPairs = self.allReviewPairs
+		pairs = filter(lambda p: p.state == 'correct')
+		return pairs
+	
+	@property
+	def dailyReviewPairs(self):
+		date = datetime.today() - datetime.timedelta(1)
+		pairs = self.reviewPairs(8, date)
+		return pairs
+	
+	@property
+	def weeklyReviewPairs(self):
+		date = datetime.today() - datetime.timedelta(7)
+		pairs = self.reviewPairs(12, date)
+		return pairs
+	
+	@property
+	def monthlyReviewPairs(self):
+		date = datetime.today() - datetime.timedelta(30)
+		pairs = self.reviewPairs(25, date)
+		return pairs
+	
+	@property
+	def yearlyReviewPairs(self):
+		date = datetime.today() - datetime.timedelta(365)
+		pairs = self.reviewPairs(None, date)
+		return pairs
+	
+	@property
+	def reviewPairs(self, numSuccesses, date):
+		query = Pair.all().filter('categories =', self.key())
+		if numSuccesses:
+			query.filter('numSuccesses <' numSuccesses)
+		query.filter('lastSuccess <=' date)
+		pairs = query.fetch(1000)
+		return pairs
+	
+	
+		
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):

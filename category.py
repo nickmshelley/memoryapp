@@ -109,8 +109,6 @@ class Category(db.Model):
 		pairs = query.fetch(1000)
 		return pairs
 	
-	
-		
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):
@@ -133,7 +131,10 @@ class CategoryPage(webapp.RequestHandler):
 			if pairKey:
 				pair = db.get(pairKey)
 			else:
-				pairs = category.readyPairs
+				if category.reviewing:
+					pairs = category.readyReviewPairs
+				else:
+					pairs = category.readyPairs
 				if len(pairs) == 0:
 					reset_pairs(category_key)
 					pairs = category.readyPairs

@@ -59,6 +59,7 @@ class CategoryPage(webapp.RequestHandler):
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
 		pair = None
+		changed = True
 		if not category:
 			error_message = "Category does not exist"
 		elif category.owner != user:
@@ -69,11 +70,11 @@ class CategoryPage(webapp.RequestHandler):
 			else:
 				pairs = category.readyPairs
 				if len(pairs) == 0:
-					reset_pairs(category)
-					pairs = category.readyPairs
+					changed = reset_pairs(category)
 					
 				#make sure there are pairs in the category (avoid out of bounds error)	
-				if len(pairs) > 0:
+				if changed:
+					pairs = category.readyPairs
 					index = random.randint(0, len(pairs) - 1)
 					pair = pairs[index]
 			

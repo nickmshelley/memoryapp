@@ -104,8 +104,8 @@ class Category(db.Model):
 	def reviewPairs(self, numSuccesses, date):
 		query = Pair.all().filter('categories =', self.key())
 		if numSuccesses:
-			query.filter('numSuccesses <' numSuccesses)
-		query.filter('lastSuccess <=' date)
+			query.filter('numSuccesses <', numSuccesses)
+		query.filter('lastSuccess <=', date)
 		pairs = query.fetch(1000)
 		return pairs
 	

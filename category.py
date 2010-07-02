@@ -69,11 +69,8 @@ class CategoryPage(webapp.RequestHandler):
 			else:
 				pairs = category.readyPairs
 				if len(pairs) == 0:
-					reset_pairs(category_key)
+					reset_pairs(category)
 					pairs = category.readyPairs
-					
-					# get updated meta information
-					category = db.get(category_key)
 					
 				#make sure there are pairs in the category (avoid out of bounds error)	
 				if len(pairs) > 0:
@@ -104,29 +101,51 @@ class AddCategoryAction(webapp.RequestHandler):
 		category.put()
 		self.redirect('/')
 
-def reset_pairs(categoryKey):
-	category = db.get(categoryKey)
+def reset_pairs(category):
+	changed = reset_missed(category)
+	if not changed:
+		changed = reset_correct(category)
+	return changed
+
+def reset_missed(category):
+	pairs = []
+# 	if category.reviewing:
+# 		pairs = category.missedReviewPairs
+# 	else:
+# 		pairs = category.missedPairs
 	pairs = category.missedPairs
-	changed = False
 	category.remaining = 0
+	changed = False
 	while len(pairs) > 0:
 		changed = True
 		category.remaining += len(pairs)
 		for pair in pairs:
 			pair.state = 'ready'
 			pair.put()
+# 		if category.reviewing:
+# 			pairs = cagegory.missedReviewPairs
+# 		else:
+# 			pairs = category.missedPairs
 		pairs = category.missedPairs
 	if changed:
 		category.missed = 0
 		category.put()
-	else:
+	return changed
+
+def reset_correct(category):
+	pairs = []
+	#don't need to do this for review because if all are correct, it exits the review
+	pairs = category.correctPairs
+	changed = False
+	while len(pairs) > 0:
+		changed = True
+		category.remaining += len(pairs)
+		for pair in pairs:
+			pair.state = 'ready'
+			pair.put()
 		pairs = category.correctPairs
-		while len(pairs) > 0:
-			changed = True
-			category.remaining = len(pairs)
-			for pair in pairs:
-				pair.state = 'ready'
-				pair.put()
-			pairs = category.correctPairs
+	if changed:
 		category.correct = 0
 		category.put()
+	return changed
+		

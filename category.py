@@ -22,6 +22,7 @@ class Category(db.Model):
 	error = db.IntegerProperty(default = 0)
 	
 	reviewing = db.BooleanProperty(default=False)
+	reviewFrequency = db.CategoryProperty() #daily, weekly, monthly, yearly
 	
 	@property
 	def allPairs(self):
@@ -61,50 +62,51 @@ class Category(db.Model):
 	@property
 	def readyReviewPairs(self):
 		allPairs = self.allReviewPairs
-		pairs = filter(lambda p: p.state == 'ready')
+		pairs = [p for p in allPairs if p.state == 'ready']
+		#pairs = filter(lambda p: p.state == 'ready', allPairs)
 		return pairs
 	
 	@property
 	def missedReviewPairs(self):
 		allPairs = self.allReviewPairs
-		pairs = filter(lambda p: p.state == 'missed')
+		pairs = [p for p in allPairs if p.state == 'missed']
+		#pairs = filter(lambda p: p.state == 'missed', allPairs)
 		return pairs
 	
 	@property
 	def correctReviewPairs(self):
 		allPairs = self.allReviewPairs
-		pairs = filter(lambda p: p.state == 'correct')
+		pairs = [p for p in allPairs if p.state == 'correct']
+		#pairs = filter(lambda p: p.state == 'correct', allPairs)
 		return pairs
 	
 	@property
 	def dailyReviewPairs(self):
-		date = datetime.today() - datetime.timedelta(1)
-		pairs = self.reviewPairs(8, date)
+		date = datetime.date.today() - datetime.timedelta(1)
+		pairs = self.reviewPairs('daily', date)
 		return pairs
 	
 	@property
 	def weeklyReviewPairs(self):
-		date = datetime.today() - datetime.timedelta(7)
-		pairs = self.reviewPairs(12, date)
+		date = datetime.date.today() - datetime.timedelta(7)
+		pairs = self.reviewPairs('weekly', date)
 		return pairs
 	
 	@property
 	def monthlyReviewPairs(self):
-		date = datetime.today() - datetime.timedelta(30)
-		pairs = self.reviewPairs(25, date)
+		date = datetime.date.today() - datetime.timedelta(30)
+		pairs = self.reviewPairs('monthly', date)
 		return pairs
 	
 	@property
 	def yearlyReviewPairs(self):
-		date = datetime.today() - datetime.timedelta(365)
-		pairs = self.reviewPairs(None, date)
+		date = datetime.date.today() - datetime.timedelta(365)
+		pairs = self.reviewPairs('yearly', date)
 		return pairs
 	
-	@property
-	def reviewPairs(self, numSuccesses, date):
+	def reviewPairs(self, frequency, date):
 		query = Pair.all().filter('categories =', self.key())
-		if numSuccesses:
-			query.filter('numSuccesses <', numSuccesses)
+		query.filter('reviewFrequency =', frequency)
 		query.filter('lastSuccess <=', date)
 		pairs = query.fetch(1000)
 		return pairs
@@ -123,6 +125,7 @@ class CategoryPage(webapp.RequestHandler):
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
 		pair = None
+		changed = True
 		if not category:
 			error_message = "Category does not exist"
 		elif category.owner != user:
@@ -136,14 +139,11 @@ class CategoryPage(webapp.RequestHandler):
 				else:
 					pairs = category.readyPairs
 				if len(pairs) == 0:
-					reset_pairs(category_key)
-					pairs = category.readyPairs
-					
-					# get updated meta information
-					category = db.get(category_key)
+					changed = reset_pairs(category)
 					
 				#make sure there are pairs in the category (avoid out of bounds error)	
-				if len(pairs) > 0:
+				if changed:
+					pairs = category.readyPairs
 					index = random.randint(0, len(pairs) - 1)
 					pair = pairs[index]
 			
@@ -179,29 +179,50 @@ class SetReviewingAction(webapp.RequestHandler):
 		category.put()
 		self.redirect('/category?id=' + category_key)
 
-def reset_pairs(categoryKey):
-	category = db.get(categoryKey)
-	pairs = category.missedPairs
-	changed = False
+def reset_pairs(category):
+	changed = reset_missed(category)
+	if not changed:
+		changed = reset_correct(category)
+	return changed
+
+def reset_missed(category):
+	pairs = []
+	if category.reviewing:
+		pairs = category.missedReviewPairs
+	else:
+		pairs = category.missedPairs
 	category.remaining = 0
+	changed = False
 	while len(pairs) > 0:
 		changed = True
 		category.remaining += len(pairs)
 		for pair in pairs:
 			pair.state = 'ready'
 			pair.put()
+		if category.reviewing:
+			pairs = cagegory.missedReviewPairs
+		else:
+			pairs = category.missedPairs
 		pairs = category.missedPairs
 	if changed:
 		category.missed = 0
 		category.put()
-	else:
+	return changed
+
+def reset_correct(category):
+	pairs = []
+	#don't need to do this for review because if all are correct, it exits the review
+	pairs = category.correctPairs
+	changed = False
+	while len(pairs) > 0:
+		changed = True
+		category.remaining += len(pairs)
+		for pair in pairs:
+			pair.state = 'ready'
+			pair.put()
 		pairs = category.correctPairs
-		while len(pairs) > 0:
-			changed = True
-			category.remaining += len(pairs)
-			for pair in pairs:
-				pair.state = 'ready'
-				pair.put()
-			pairs = category.correctPairs
+	if changed:
 		category.correct = 0
 		category.put()
+	return changed
+		

@@ -14,3 +14,14 @@ indexes:
   properties:
   - name: owner
   - name: name
+
+- kind: Pair
+  properties:
+  - name: categories
+  - name: lastSuccess
+
+- kind: Pair
+  properties:
+  - name: categories
+  - name: reviewFrequency
+  - name: lastSuccess

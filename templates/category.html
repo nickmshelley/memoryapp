@@ -5,7 +5,9 @@
 {% endblock head %}
 
 {% block nav %}
-	<p><a href="/new-pair?category={{ category.key }}">New Card</a></p>
+	{% if not reviewing %}
+		<p><a href="/new-pair?category={{ category_key }}">New Card</a></p>
+	{% endif %}
 {% endblock nav %}
 
 {% block content %}
@@ -17,39 +19,43 @@
 		<p>{{ pair.answer }}</p>
 	{% endif %}
 	<p class="counts">
-		<span>Total: {{ category.total }}</span>
-		<span>Remaining: {{category.remaining }}</span>
-		<span>Correct: {{ category.correct }}</span>
-		<span>Missed: {{ category.missed }}</span>
+		<span>Total: {{ counts.total }}</span>
+		<span>Remaining: {{counts.remaining }}</span>
+		<span>Correct: {{ counts.correct }}</span>
+		<span>Missed: {{ counts.missed }}</span>
 	</p>
 	
 	{% if pair %}
 	<div class="buttons">
-		<a href="/category?id={{ category.key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
+		<a href="/category?id={{ category_key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="correct" />
-			<input type="hidden" name="category" value="{{ category.key }}" />
+			<input type="hidden" name="category" value="{{ category_key }}" />
 			<input type="submit" value="Correct" />
 		</form>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="missed" />
-			<input type="hidden" name="category" value="{{ category.key }}" />
+			<input type="hidden" name="category" value="{{ category_key }}" />
 			<input type="submit" value="Missed" />
 		</form>
 		{% if not pair.reviewing %}
 		<form action="/mark-review" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
-			<input type="hidden" name="category" value="{{ category.key }}" />
+			<input type="hidden" name="category" value="{{ category_key }}" />
 			<input type="submit" value="Add to Review Schedule" />
 		</form>
 		{% endif %}
 	</div>
-	
-	<form action="/set-reviewing" method="post">
-		<input type="hidden" name="category" value="{{ category.key }}" />
-		<input type="submit" value="Review Category" />
-	</form>
 	{% endif %}
+	<form action="/set-reviewing" method="post">
+		<input type="hidden" name="category" value="{{ category_key }}" />
+		<input type="hidden" name="reviewing" value="{{ reviewing }}" />
+		{% if reviewing %}
+			<input type="submit" value="Exit Review" />
+		{% else %}
+			<input type="submit" value="Review Category" />
+		{% endif %}
+	</form>
 {% endblock content %}

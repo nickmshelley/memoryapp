@@ -11,16 +11,24 @@ class Pair(db.Model):
 	# Pair info
 	question = db.StringProperty()
 	answer = db.TextProperty()
-	state = db.CategoryProperty() #missed, correct, ready, etc.
-	reviewing = db.BooleanProperty()
-	numSuccesses = db.IntegerProperty()
+	state = db.CategoryProperty(default = 'ready') #missed, correct, ready, etc.
+	reviewState = db.CategoryProperty(default = 'ready') #same as above but used in review mode
+	reviewing = db.BooleanProperty(default = False)
+	numSuccesses = db.IntegerProperty(default = 0)
 	
 	# Date info
 	firstSuccess = db.DateProperty()
 	lastSuccess = db.DateProperty()
+	reviewFrequency = db.CategoryProperty() #daily, weekly, monthly, yearly
 	
 	# Category Affiliation
 	categories = db.ListProperty(db.Key)
+	
+	def setState(self, state, reviewing):
+		if reviewing:
+			self.reviewState = state
+		else:
+			self.state = state
 
 class NewPairForm(webapp.RequestHandler):
 	def get(self):
@@ -37,11 +45,10 @@ class AddPairAction(webapp.RequestHandler):
 		pair = Pair(owner = users.get_current_user())
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
-		pair.state = db.Category("ready")
 		pair.categories.append(db.Key(category_key))
 		pair.put()
 		category = db.get(category_key)
-		category.size += 1
+		category.total += 1
 		category.remaining += 1
 		category.put()
 		self.redirect('/category?id=' + category_key)
@@ -52,18 +59,22 @@ class UpdatePairAction(webapp.RequestHandler):
 		state = self.request.get('state')
 		category_key = self.request.get('category')
 		pair = db.get(pair_key)		
-		pair.state = state
-		pair.put()
 		
 		#update category meta information
 		category = db.get(category_key)
+		pair.setState(state, category.reviewing)
 		if state == 'missed':
-			category.missed += 1
+			category.addMissed(1)
 		elif state == 'correct':
-			category.correct += 1
+			if category.reviewing:
+				pair.numSuccesses += 1
+				pair.lastSuccess = datetime.date.today()
+				pair.reviewFrequency = calculateReviewFrequency(pair)
+			category.addCorrect(1)
 		else:
-			category.error += 1
-		category.remaining -= 1	
+			category.addError(1)
+		category.addRemaining(-1)	
+		pair.put()
 		category.put()
 		self.redirect('/category?id=' + category_key)
 
@@ -74,7 +85,9 @@ class MarkReviewAction(webapp.RequestHandler):
 		pair = db.get(pair_key)
 		pair.reviewing = True
 		pair.firstSuccess = datetime.date.today()
+		pair.lastSuccess = pair.firstSuccess
 		pair.numSuccesses = 1
+		pair.reviewFrequency = 'daily'
 		pair.state = 'correct'
 		pair.put()
 		category = db.get(category_key)
@@ -82,6 +95,19 @@ class MarkReviewAction(webapp.RequestHandler):
 		category.remaining -= 1
 		category.put()
 		self.redirect('/category?id=' + category_key)
+
+def calculateReviewFrequency(pair):
+	n = pair.numSuccesses
+	f = ''
+	if n < 8:
+		f = 'daily'
+	elif n < 12:
+		f = 'weekly'
+	elif n < 25:
+		f = 'monthly'
+	else:
+		f = 'yearly'
+	return f
 
 #hack to fix circular import
 from category import *

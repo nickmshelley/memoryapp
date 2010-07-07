@@ -197,7 +197,7 @@ class Category(db.Model):
 	def getReviewPairs(self, frequency, date):
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('reviewFrequency =', frequency)
-		#query.filter('lastSuccess <=', date)
+		query.filter('lastSuccess <=', date)
 		pairs = query.fetch(1000)
 		return pairs
 	

@@ -1,6 +1,7 @@
 from pair import Pair
 import unittest
 import datetime
+from datetime import timedelta
 from google.appengine.api.users import User
 from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import datastore_file_stub
@@ -49,3 +50,196 @@ class TestPairModel(unittest.TestCase):
 		pair.setState('correct', True)
 		self.assertEquals(pair.reviewState, 'correct')
 		self.assertEquals(pair.state, 'missed')
+	
+	def testSetReviewFrequency(self):
+		pairs = Pair.all().fetch(1000)
+		pair = pairs[0]
+		
+		pair.numSuccesses = 0
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		
+		pair.numSuccesses = 1
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		
+		pair.numSuccesses = 6
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		
+		pair.numSuccesses = 7
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		
+		pair.numSuccesses = 8
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'weekly')
+		
+		pair.numSuccesses = 9
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'weekly')
+		
+		pair.numSuccesses = 11
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'weekly')
+		
+		pair.numSuccesses = 12
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		
+		pair.numSuccesses = 13
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		
+		pair.numSuccesses = 20
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		
+		pair.numSuccesses = 24
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		
+		pair.numSuccesses = 25
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		
+		pair.numSuccesses = 26
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		
+		pair.numSuccesses = 30
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		
+		pair.numSuccesses = 60
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		
+		pair.numSuccesses = 100
+		pair.setReviewFrequency()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+	
+	def testUpdateSuccesses(self):
+		pairs = Pair.all().fetch(1000)
+		pair = pairs[0]
+		
+		date = datetime.date.today()
+		
+		pair.numSuccesses = 0
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 1)
+		
+		pair.numSuccesses = 1
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 2)
+		
+		pair.numSuccesses = 5
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 6)
+		
+		pair.numSuccesses = 6
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'daily')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 7)
+		
+		pair.numSuccesses = 7
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'weekly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 8)
+		
+		pair.numSuccesses = 8
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'weekly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 9)
+		
+		pair.numSuccesses = 10
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'weekly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 11)
+		
+		pair.numSuccesses = 11
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 12)
+		
+		pair.numSuccesses = 12
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 13)
+		
+		pair.numSuccesses = 13
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 14)
+		
+		pair.numSuccesses = 20
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 21)
+		
+		pair.numSuccesses = 23
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'monthly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 24)
+		
+		pair.numSuccesses = 24
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 25)
+		
+		pair.numSuccesses = 25
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 26)
+		
+		pair.numSuccesses = 26
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 27)
+		
+		pair.numSuccesses = 30
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 31)
+		
+		pair.numSuccesses = 60
+		pair.lastSuccess = date - timedelta(8)
+		pair.updateSuccesses()
+		self.assertEquals(pair.reviewFrequency, 'yearly')
+		self.assertEquals(pair.lastSuccess, date)
+		self.assertEquals(pair.numSuccesses, 61)

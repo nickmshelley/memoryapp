@@ -24,11 +24,29 @@ class Pair(db.Model):
 	# Category Affiliation
 	categories = db.ListProperty(db.Key)
 	
+	def updateSuccesses(self):
+		self.numSuccesses += 1
+		self.lastSuccess = datetime.date.today()
+		self.setReviewFrequency()
+	
 	def setState(self, state, reviewing):
 		if reviewing:
 			self.reviewState = state
 		else:
 			self.state = state
+	
+	def setReviewFrequency(self):
+		n = self.numSuccesses
+		f = ''
+		if n < 8:
+			f = 'daily'
+		elif n < 12:
+			f = 'weekly'
+		elif n < 25:
+			f = 'monthly'
+		else:
+			f = 'yearly'
+		self.reviewFrequency = f
 
 class NewPairForm(webapp.RequestHandler):
 	def get(self):
@@ -67,9 +85,9 @@ class UpdatePairAction(webapp.RequestHandler):
 			category.addMissed(1)
 		elif state == 'correct':
 			if category.reviewing:
-				pair.numSuccesses += 1
+				pair.updateSuccesses()
 				pair.lastSuccess = datetime.date.today()
-				pair.reviewFrequency = calculateReviewFrequency(pair)
+				pair.setReviewFrequency()
 			category.addCorrect(1)
 		else:
 			category.addError(1)
@@ -95,19 +113,6 @@ class MarkReviewAction(webapp.RequestHandler):
 		category.remaining -= 1
 		category.put()
 		self.redirect('/category?id=' + category_key)
-
-def calculateReviewFrequency(pair):
-	n = pair.numSuccesses
-	f = ''
-	if n < 8:
-		f = 'daily'
-	elif n < 12:
-		f = 'weekly'
-	elif n < 25:
-		f = 'monthly'
-	else:
-		f = 'yearly'
-	return f
 
 #hack to fix circular import
 from category import *

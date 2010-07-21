@@ -90,7 +90,7 @@ class UpdatePairAction(webapp.RequestHandler):
 				pair.setReviewFrequency()
 			category.addCorrect(1)
 		else:
-			category.addError(1)
+			category.error += 1
 		category.addRemaining(-1)	
 		pair.put()
 		category.put()

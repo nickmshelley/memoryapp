@@ -216,24 +216,23 @@ class CategoryPage(webapp.RequestHandler):
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
 		pair = None
-		changed = True
+		doneReviewing = False
 		if not category:
 			error_message = "Category does not exist"
 		elif category.owner != user:
 			error_message = "You do not own this category"
-		else:
+		elif category.total > 0:
 			if pairKey:
 				pair = db.get(pairKey)
 			else:
 				pairs = category.readyPairs
 				if len(pairs) == 0:
-					changed = reset_pairs(category, self)
-					
-				#make sure there are pairs in the category (avoid out of bounds error)	
-				if changed:
-					pairs = category.readyPairs
-					index = random.randint(0, len(pairs) - 1)
-					pair = pairs[index]
+					doneReviewing = reset_pairs(category)
+					if doneReviewing:
+						self.redirect('/category?id=' + str(category.key()))
+				pairs = category.readyPairs
+				index = random.randint(0, len(pairs) - 1)
+				pair = pairs[index]
 			counts = category.getCounts()
 			
 		self.response.out.write(template.render(path, {'pair': pair,
@@ -282,15 +281,16 @@ class SetReviewingAction(webapp.RequestHandler):
 				category.put()
 		self.redirect('/category?id=' + category_key)
 
-def reset_pairs(category, handler):
+def reset_pairs(category):
+	doneReviewing = False
 	changed = reset_missed(category)
 	if not changed:
 		changed = reset_correct(category)
 		if category.reviewing:
 			category.reviewing = False
 			category.put()
-			handler.redirect('/category?id=' + str(category.key()))
-	return changed
+			doneReviewing = True
+	return doneReviewing
 
 def reset_missed(category):
 	pairs = []

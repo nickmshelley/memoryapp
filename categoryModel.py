@@ -1,8 +1,80 @@
 from google.appengine.ext import db
 import datetime
-from pairModel import *	
+from pairModel import *
+
+class NonReviewState:
+	def setMissed(self, cat, num):
+		cat.missed = num
+	
+	def addMissed(self, cat, num):
+		cat.missed += num
+	
+	def setRemaining(self, cat, num):
+		cat.remaining = num
+	
+	def addRemaining(self, cat, num):
+		cat.remaining += num
+	
+	def setCorrect(self, cat, num):
+		cat.correct = num
+	
+	def addCorrect(self, cat, num):
+		cat.correct += num
+	
+	def getCounts(self, cat):
+		return cat.getAllCounts()
+	
+	def pairs(self, cat):
+		return cat.allPairs
+	
+	def readyPairs(self, cat):
+		return cat.allReadyPairs
+	
+	def missedPairs(self, cat):
+		return cat.allMissedPairs
+	
+	def correctPairs(self, cat):
+		return cat.allCorrectPairs
+
+class ReviewState:
+	def setMissed(self, cat, num):
+		cat.reviewMissed = num
+	
+	def addMissed(self, cat, num):
+		cat.reviewMissed += num
+	
+	def setRemaining(self, cat, num):
+		cat.reviewRemaining = num
+	
+	def addRemaining(self, cat, num):
+		cat.reviewRemaining += num
+	
+	def setCorrect(self, cat, num):
+		cat.reviewCorrect = num
+	
+	def addCorrect(self, cat, num):
+		cat.reviewCorrect += num
+	
+	def getCounts(self, cat):
+		return cat.getReviewCounts()
+	
+	def pairs(self, cat):
+		return cat.reviewPairs
+	
+	def readyPairs(self, cat):
+		return cat.reviewReadyPairs
+	
+	def missedPairs(self, cat):
+		return cat.reviewMissedPairs
+	
+	def correctPairs(self, cat):
+		return cat.reviewCorrectPairs
 
 class Category(db.Model):
+	reviewState = ReviewState()
+	nonReviewState = NonReviewState()
+	state = nonReviewState
+	
 	name = db.StringProperty()
 	owner = db.UserProperty(required = True)
 	description = db.TextProperty()
@@ -20,47 +92,34 @@ class Category(db.Model):
 	
 	reviewing = db.BooleanProperty(default=False)
 	
+	def setReviewing(self):
+		self.reviewing = True
+		self.state = reviewState
+	
+	def unsetReviewing(self):
+		self.reviewing = False
+		self.state = nonReviewState
+	
 	def setMissed(self, num):
-		if self.reviewing:
-			self.reviewMissed = num
-		else:
-			self.missed = num
+		self.state.setMissed(self, num)
 	
 	def addMissed(self, num):
-		if self.reviewing:
-			self.reviewMissed += num
-		else:
-			self.missed += num
+		self.state.addMissed(self, num)
 	
 	def setRemaining(self, num):
-		if self.reviewing:
-			self.reviewRemaining = num
-		else:
-			self.remaining = num
+		self.state.setRemaining(self, num)
 	
 	def addRemaining(self, num):
-		if self.reviewing:
-			self.reviewRemaining += num
-		else:
-			self.remaining += num
+		self.state.addRemaining(self, num)
 	
 	def setCorrect(self, num):
-		if self.reviewing:
-			self.reviewCorrect = num
-		else:
-			self.correct = num
+		self.state.setCorrect(self, num)
 	
 	def addCorrect(self, num):
-		if self.reviewing:
-			self.reviewCorrect += num
-		else:
-			self.correct += num
+		self.state.addCorrect(self, num)
 	
 	def getCounts(self):
-		if self.reviewing:
-			return self.getReviewCounts()
-		else:
-			return self.getAllCounts()
+		return self.state.getCounts(self)
 	
 	def getAllCounts(self):
 		counts = {
@@ -82,10 +141,7 @@ class Category(db.Model):
 	
 	@property
 	def pairs(self):
-		if self.reviewing:
-			return self.reviewPairs
-		else:
-			return self.allPairs
+		return self.state.pairs(self)
 	
 	@property
 	def allPairs(self):
@@ -103,10 +159,7 @@ class Category(db.Model):
 	
 	@property
 	def readyPairs(self):
-		if self.reviewing:
-			return self.reviewReadyPairs
-		else:
-			return self.allReadyPairs
+		return self.state.readyPairs(self)
 	
 	@property
 	def allReadyPairs(self):
@@ -124,10 +177,7 @@ class Category(db.Model):
 	
 	@property
 	def missedPairs(self):
-		if self.reviewing:
-			return self.reviewMissedPairs
-		else:
-			return self.allMissedPairs
+		return self.state.missedPairs(self)
 	
 	@property
 	def allMissedPairs(self):
@@ -145,10 +195,7 @@ class Category(db.Model):
 	
 	@property
 	def correctPairs(self):
-		if self.reviewing:
-			return self.reviewCorrectPairs
-		else:
-			return self.allCorrectPairs
+		return self.state.correctPairs(self)
 	
 	@property
 	def allCorrectPairs(self):

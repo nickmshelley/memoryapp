@@ -71,7 +71,7 @@ class SetReviewingAction(webapp.RequestHandler):
 		reviewing = self.request.get('reviewing')
 		category = db.get(category_key)
 		if reviewing == 'True':
-			category.reviewing = False
+			category.unsetReviewing()
 			category.put()
 		else:
 			pairs = category.reviewPairs
@@ -81,7 +81,7 @@ class SetReviewingAction(webapp.RequestHandler):
 				reset_correct(category)
 				category.reviewTotal = size
 				category.reviewRemaining = size
-				category.reviewing = True
+				category.setReviewing
 				category.put()
 		self.redirect('/category?id=' + category_key)
 
@@ -91,7 +91,7 @@ def reset_pairs(category):
 	if not changed:
 		changed = reset_correct(category)
 		if category.reviewing:
-			category.reviewing = False
+			category.unsetReviewing
 			category.put()
 			doneReviewing = True
 	return doneReviewing

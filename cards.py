@@ -3,8 +3,9 @@ import os
 from google.appengine.api import users
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
-from pair import *
-from category import *
+from pairController import *
+from categoryModel import *
+from categoryController import *
 
 class MainPage(webapp.RequestHandler):
 	def get(self):

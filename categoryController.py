@@ -31,7 +31,7 @@ class CategoryPage(webapp.RequestHandler):
 			else:
 				pairs = category.readyPairs
 				if len(pairs) == 0:
-					doneReviewing = category.reset_pairs()
+					doneReviewing = category.resetPairs()
 					category.put()
 					if doneReviewing:
 						self.redirect('/category?id=' + str(category.key()))

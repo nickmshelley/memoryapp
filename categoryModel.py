@@ -255,17 +255,17 @@ class Category(db.Model):
 		pairs = query.fetch(1000)
 		return pairs
 	
-	def reset_pairs(self):
+	def resetPairs(self):
 		doneReviewing = False
-		changed = self.reset_missed()
+		changed = self.resetMissed()
 		if not changed:
-			changed = self.reset_correct()
+			changed = self.resetCorrect()
 			if self.reviewing:
 				self.unsetReviewing()
 				doneReviewing = True
 		return doneReviewing
 	
-	def reset_missed(self):
+	def resetMissed(self):
 		pairs = []
 		pairs = self.missedPairs
 		self.setRemaining(0)
@@ -281,7 +281,7 @@ class Category(db.Model):
 			self.setMissed(0)
 		return changed
 	
-	def reset_correct(self):
+	def resetCorrect(self):
 		pairs = []
 		pairs = self.correctPairs
 		changed = False

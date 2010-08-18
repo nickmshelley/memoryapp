@@ -199,6 +199,16 @@ class TestCategoryModel(unittest.TestCase):
 		pair.categories.append(category.key())
 		pair.put()
 		
+		category.total = 43
+		category.remaining = 27
+		category.missed = 12
+		category.correct = 4
+		category.reviewTotal = 24
+		category.reviewRemaining = 12
+		category.reviewMissed = 4
+		category.reviewCorrect = 8
+		category.put()
+		
 	def testCreation(self):
 		user = User(email = "test@foo.com")
 		self.assertRaises(BadValueError, Category)
@@ -214,6 +224,25 @@ class TestCategoryModel(unittest.TestCase):
 		self.assertEquals(category.reviewCorrect, 0)
 		self.assertEquals(category.reviewRemaining, 0)
 		self.assertEquals(category.error, 0)
+		self.assertEquals(category.reviewing, False)
+	
+	def testSetReviewing(self):
+		categories = Category.all().filter('name =', 'MetaTests').fetch(1000)
+		category = categories[0]
+		
+		self.assertEquals(category.reviewing, False)
+		
+		category.setReviewing()
+		self.assertEquals(category.reviewing, True)
+	
+	def testUnsetReviewing(self):
+		categories = Category.all().filter('name =', 'MetaTests').fetch(1000)
+		category = categories[0]
+		
+		category.reviewing = True
+		self.assertEquals(category.reviewing, True)
+		
+		category.unsetReviewing()
 		self.assertEquals(category.reviewing, False)
 	
 	def testSetMissed(self):
@@ -506,3 +535,122 @@ class TestCategoryModel(unittest.TestCase):
 		
 		pairs = category.reviewCorrectPairs
 		self.assertEquals(len(pairs), 8)
+	
+	def testResetMissed(self):
+		categories = Category.all().filter('name =', 'RetrievalTest').fetch(1000)
+		category = categories[0]
+		
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 12)
+		self.assertEquals(category.missed, 12)
+		pairs = category.reviewMissedPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.reviewMissed, 4)
+		
+		category.resetMissed()
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.missed, 0)
+		pairs = category.reviewMissedPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.reviewMissed, 4)
+		
+		category.setReviewing()
+		
+		category.resetMissed()
+		pairs = category.reviewMissedPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.reviewMissed, 0)
+	
+	def testResetCorrect(self):
+		categories = Category.all().filter('name =', 'RetrievalTest').fetch(1000)
+		category = categories[0]
+		
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.correct, 4)
+		pairs = category.reviewCorrectPairs
+		self.assertEquals(len(pairs), 8)
+		self.assertEquals(category.reviewCorrect, 8)
+		
+		category.resetCorrect()
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.correct, 0)
+		pairs = category.reviewCorrectPairs
+		self.assertEquals(len(pairs), 8)
+		self.assertEquals(category.reviewCorrect, 8)
+		
+		category.setReviewing()
+		
+		category.resetCorrect()
+		pairs = category.reviewCorrectPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.reviewCorrect, 0)
+	
+	def testResetPairs(self):
+		categories = Category.all().filter('name =', 'RetrievalTest').fetch(1000)
+		category = categories[0]
+		category.setReviewing()
+		
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 12)
+		self.assertEquals(category.missed, 12)
+		pairs = category.reviewMissedPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.reviewMissed, 4)
+		
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.correct, 4)
+		pairs = category.reviewCorrectPairs
+		self.assertEquals(len(pairs), 8)
+		self.assertEquals(category.reviewCorrect, 8)
+		
+		category.resetPairs()
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 12)
+		self.assertEquals(category.missed, 12)
+		pairs = category.reviewMissedPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.reviewMissed, 0)
+		
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.correct, 4)
+		pairs = category.reviewCorrectPairs
+		self.assertEquals(len(pairs), 8)
+		self.assertEquals(category.reviewCorrect, 8)
+		
+		category.resetPairs()
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 12)
+		self.assertEquals(category.missed, 12)
+		pairs = category.reviewMissedPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.reviewMissed, 0)
+		
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.correct, 4)
+		pairs = category.reviewCorrectPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.reviewCorrect, 0)
+		
+		category.unsetReviewing()
+		
+		category.resetPairs()
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.missed, 0)
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 4)
+		self.assertEquals(category.correct, 4)
+		
+		category.resetPairs()
+		pairs = category.allMissedPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.missed, 0)
+		pairs = category.allCorrectPairs
+		self.assertEquals(len(pairs), 0)
+		self.assertEquals(category.correct, 0)

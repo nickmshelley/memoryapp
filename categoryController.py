@@ -91,7 +91,7 @@ def reset_pairs(category):
 	if not changed:
 		changed = reset_correct(category)
 		if category.reviewing:
-			category.unsetReviewing
+			category.unsetReviewing()
 			category.put()
 			doneReviewing = True
 	return doneReviewing

@@ -1,5 +1,5 @@
-from category import Category
-from pair import Pair
+from categoryModel import Category
+from pairModel import Pair
 import datetime
 from datetime import timedelta
 import unittest
@@ -224,7 +224,7 @@ class TestCategoryModel(unittest.TestCase):
 		self.assertEquals(category.missed, 4)
 		self.assertEquals(category.reviewMissed, 0)
 		
-		category.reviewing = True
+		category.setReviewing()
 		category.setMissed(8)
 		self.assertEquals(category.missed, 4)
 		self.assertEquals(category.reviewMissed, 8)
@@ -240,7 +240,7 @@ class TestCategoryModel(unittest.TestCase):
 		category.addMissed(-1)
 		self.assertEquals(category.missed, 1)
 		
-		category.reviewing = True
+		category.setReviewing()
 		category.addMissed(4)
 		self.assertEquals(category.reviewMissed, 4)
 		self.assertEquals(category.missed, 1)
@@ -256,7 +256,7 @@ class TestCategoryModel(unittest.TestCase):
 		self.assertEquals(category.remaining, 4)
 		self.assertEquals(category.reviewRemaining, 0)
 		
-		category.reviewing = True
+		category.setReviewing()
 		category.setRemaining(8)
 		self.assertEquals(category.remaining, 4)
 		self.assertEquals(category.reviewRemaining, 8)
@@ -272,7 +272,7 @@ class TestCategoryModel(unittest.TestCase):
 		category.addRemaining(-1)
 		self.assertEquals(category.remaining, 1)
 		
-		category.reviewing = True
+		category.setReviewing()
 		category.addRemaining(4)
 		self.assertEquals(category.reviewRemaining, 4)
 		self.assertEquals(category.remaining, 1)
@@ -288,7 +288,7 @@ class TestCategoryModel(unittest.TestCase):
 		self.assertEquals(category.correct, 4)
 		self.assertEquals(category.reviewCorrect, 0)
 		
-		category.reviewing = True
+		category.setReviewing()
 		category.setCorrect(8)
 		self.assertEquals(category.correct, 4)
 		self.assertEquals(category.reviewCorrect, 8)
@@ -304,7 +304,7 @@ class TestCategoryModel(unittest.TestCase):
 		category.addCorrect(-1)
 		self.assertEquals(category.correct, 1)
 		
-		category.reviewing = True
+		category.setReviewing()
 		category.addCorrect(4)
 		self.assertEquals(category.reviewCorrect, 4)
 		self.assertEquals(category.correct, 1)
@@ -357,7 +357,7 @@ class TestCategoryModel(unittest.TestCase):
 		response = category.getCounts()
 		self.assertEquals(response, nonReviewAnswer)
 		
-		category.reviewing = True
+		category.setReviewing()
 		response = category.getCounts()
 		self.assertEquals(response, reviewAnswer)
 	
@@ -368,7 +368,7 @@ class TestCategoryModel(unittest.TestCase):
 		pairs = category.pairs
 		self.assertEquals(len(pairs), 43)
 		
-		category.reviewing = True
+		category.setReviewing()
 		pairs = category.pairs
 		self.assertEquals(len(pairs), 24)
 	
@@ -439,7 +439,7 @@ class TestCategoryModel(unittest.TestCase):
 		pairs = category.readyPairs
 		self.assertEquals(len(pairs), 27)
 		
-		category.reviewing = True
+		category.setReviewing()
 		pairs = category.readyPairs
 		self.assertEquals(len(pairs), 12)
 	
@@ -464,7 +464,7 @@ class TestCategoryModel(unittest.TestCase):
 		pairs = category.missedPairs
 		self.assertEquals(len(pairs), 12)
 		
-		category.reviewing = True
+		category.setReviewing()
 		pairs = category.missedPairs
 		self.assertEquals(len(pairs), 4)
 	
@@ -489,7 +489,7 @@ class TestCategoryModel(unittest.TestCase):
 		pairs = category.correctPairs
 		self.assertEquals(len(pairs), 4)
 		
-		category.reviewing = True
+		category.setReviewing()
 		pairs = category.correctPairs
 		self.assertEquals(len(pairs), 8)
 	

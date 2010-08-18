@@ -73,7 +73,6 @@ class ReviewState:
 class Category(db.Model):
 	reviewState = ReviewState()
 	nonReviewState = NonReviewState()
-	state = nonReviewState
 	
 	name = db.StringProperty()
 	owner = db.UserProperty(required = True)
@@ -91,35 +90,45 @@ class Category(db.Model):
 	error = db.IntegerProperty(default = 0)
 	
 	reviewing = db.BooleanProperty(default=False)
+	def getState(self):
+		if self.reviewing:
+			return Category.reviewState
+		else:
+			return Category.nonReviewState
 	
 	def setReviewing(self):
 		self.reviewing = True
-		self.state = reviewState
 	
 	def unsetReviewing(self):
 		self.reviewing = False
-		self.state = nonReviewState
 	
 	def setMissed(self, num):
-		self.state.setMissed(self, num)
+		state = self.getState()
+		state.setMissed(self, num)
 	
 	def addMissed(self, num):
-		self.state.addMissed(self, num)
+		state = self.getState()
+		state.addMissed(self, num)
 	
 	def setRemaining(self, num):
-		self.state.setRemaining(self, num)
+		state = self.getState()
+		state.setRemaining(self, num)
 	
 	def addRemaining(self, num):
-		self.state.addRemaining(self, num)
+		state = self.getState()
+		state.addRemaining(self, num)
 	
 	def setCorrect(self, num):
-		self.state.setCorrect(self, num)
+		state = self.getState()
+		state.setCorrect(self, num)
 	
 	def addCorrect(self, num):
-		self.state.addCorrect(self, num)
+		state = self.getState()
+		state.addCorrect(self, num)
 	
 	def getCounts(self):
-		return self.state.getCounts(self)
+		state = self.getState()
+		return state.getCounts(self)
 	
 	def getAllCounts(self):
 		counts = {
@@ -141,7 +150,8 @@ class Category(db.Model):
 	
 	@property
 	def pairs(self):
-		return self.state.pairs(self)
+		state = self.getState()
+		return state.pairs(self)
 	
 	@property
 	def allPairs(self):
@@ -159,7 +169,8 @@ class Category(db.Model):
 	
 	@property
 	def readyPairs(self):
-		return self.state.readyPairs(self)
+		state = self.getState()
+		return state.readyPairs(self)
 	
 	@property
 	def allReadyPairs(self):
@@ -177,7 +188,8 @@ class Category(db.Model):
 	
 	@property
 	def missedPairs(self):
-		return self.state.missedPairs(self)
+		state = self.getState()
+		return state.missedPairs(self)
 	
 	@property
 	def allMissedPairs(self):
@@ -195,7 +207,8 @@ class Category(db.Model):
 	
 	@property
 	def correctPairs(self):
-		return self.state.correctPairs(self)
+		state = self.getState()
+		return state.correctPairs(self)
 	
 	@property
 	def allCorrectPairs(self):

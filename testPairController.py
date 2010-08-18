@@ -1,5 +1,5 @@
-from pair import Pair
-from category import Category
+from pairModel import Pair
+from categoryModel import Category
 import unittest
 import datetime
 import os
@@ -13,7 +13,7 @@ from webtest import TestApp
 from cards import application
 
 
-class TestPairModel(unittest.TestCase):
+class TestPairController(unittest.TestCase):
 	def setUp(self):
 		apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
 		stub = datastore_file_stub.DatastoreFileStub('memoryapp', '/dev/null', '/dev/null')
@@ -116,7 +116,7 @@ class TestPairModel(unittest.TestCase):
 		
 		category.correct = 0
 		category.remaining = 1
-		category.reviewing = True
+		category.setReviewing()
 		pair.state = 'ready'
 		category.put()
 		pair.put()
@@ -126,6 +126,7 @@ class TestPairModel(unittest.TestCase):
 		category = categories[0]
 		pairs = category.allPairs
 		pair = pairs[0]
+		self.assertEquals(category.reviewing, True)
 		self.assertEquals(pair.reviewState, 'missed')
 		self.assertEquals(pair.state, 'ready')
 		self.assertEquals(category.reviewMissed, 1)

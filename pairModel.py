@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+import datetime
 
 class Pair(db.Model):
 	owner = db.UserProperty(required = True)

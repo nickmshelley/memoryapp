@@ -31,7 +31,8 @@ class CategoryPage(webapp.RequestHandler):
 			else:
 				pairs = category.readyPairs
 				if len(pairs) == 0:
-					doneReviewing = reset_pairs(category)
+					doneReviewing = category.reset_pairs()
+					category.put()
 					if doneReviewing:
 						self.redirect('/category?id=' + str(category.key()))
 				pairs = category.readyPairs
@@ -77,55 +78,10 @@ class SetReviewingAction(webapp.RequestHandler):
 			pairs = category.reviewPairs
 			size = len(pairs)
 			if size > 0:
-				reset_missed(category)
-				reset_correct(category)
+				category.reset_missed()
+				category.reset_correct()
 				category.reviewTotal = size
 				category.reviewRemaining = size
-				category.setReviewing
+				category.setReviewing()
 				category.put()
 		self.redirect('/category?id=' + category_key)
-
-def reset_pairs(category):
-	doneReviewing = False
-	changed = reset_missed(category)
-	if not changed:
-		changed = reset_correct(category)
-		if category.reviewing:
-			category.unsetReviewing()
-			category.put()
-			doneReviewing = True
-	return doneReviewing
-
-def reset_missed(category):
-	pairs = []
-	pairs = category.missedPairs
-	category.setRemaining(0)
-	changed = False
-	while len(pairs) > 0:
-		changed = True
-		category.addRemaining(len(pairs))
-		for pair in pairs:
-			pair.setState('ready', category.reviewing)
-			pair.put()
-		pairs = category.missedPairs
-	if changed:
-		category.setMissed(0)
-		category.put()
-	return changed
-
-def reset_correct(category):
-	pairs = []
-	pairs = category.correctPairs
-	changed = False
-	while len(pairs) > 0:
-		changed = True
-		category.addRemaining(len(pairs))
-		for pair in pairs:
-			pair.setState('ready', category.reviewing)
-			pair.put()
-		pairs = category.correctPairs
-	if changed:
-		category.setCorrect(0)
-		category.put()
-	return changed
-		

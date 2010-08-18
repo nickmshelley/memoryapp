@@ -254,3 +254,44 @@ class Category(db.Model):
 		query.filter('lastSuccess <=', date)
 		pairs = query.fetch(1000)
 		return pairs
+	
+	def reset_pairs(self):
+		doneReviewing = False
+		changed = self.reset_missed()
+		if not changed:
+			changed = self.reset_correct()
+			if self.reviewing:
+				self.unsetReviewing()
+				doneReviewing = True
+		return doneReviewing
+	
+	def reset_missed(self):
+		pairs = []
+		pairs = self.missedPairs
+		self.setRemaining(0)
+		changed = False
+		while len(pairs) > 0:
+			changed = True
+			self.addRemaining(len(pairs))
+			for pair in pairs:
+				pair.setState('ready', self.reviewing)
+				pair.put()
+			pairs = self.missedPairs
+		if changed:
+			self.setMissed(0)
+		return changed
+	
+	def reset_correct(self):
+		pairs = []
+		pairs = self.correctPairs
+		changed = False
+		while len(pairs) > 0:
+			changed = True
+			self.addRemaining(len(pairs))
+			for pair in pairs:
+				pair.setState('ready', self.reviewing)
+				pair.put()
+			pairs = self.correctPairs
+		if changed:
+			self.setCorrect(0)
+		return changed

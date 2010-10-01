@@ -12,7 +12,7 @@ class MainPage(webapp.RequestHandler):
 		user = users.get_current_user()
 		categoryQuery = Category.all().filter('owner =', user)
 		categoryQuery.order('name')
-		categories = categoryQuery.fetch(10)
+		categories = categoryQuery.fetch(100)
 		
 		logout = users.create_logout_url(self.request.uri)
 		

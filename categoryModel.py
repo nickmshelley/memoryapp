@@ -2,6 +2,7 @@ from google.appengine.ext import db
 import datetime
 from pairModel import *
 
+# State Pattern classes
 class NonReviewState:
 	def setMissed(self, cat, num):
 		cat.missed = num
@@ -70,6 +71,7 @@ class ReviewState:
 	def correctPairs(self, cat):
 		return cat.reviewCorrectPairs
 
+# Model class
 class Category(db.Model):
 	reviewState = ReviewState()
 	nonReviewState = NonReviewState()

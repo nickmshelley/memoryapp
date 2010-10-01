@@ -78,10 +78,10 @@ class SetReviewingAction(webapp.RequestHandler):
 			pairs = category.reviewPairs
 			size = len(pairs)
 			if size > 0:
-				category.reset_missed()
-				category.reset_correct()
+				category.setReviewing()
+				category.resetMissed()
+				category.resetCorrect()
 				category.reviewTotal = size
 				category.reviewRemaining = size
-				category.setReviewing()
 				category.put()
 		self.redirect('/category?id=' + category_key)

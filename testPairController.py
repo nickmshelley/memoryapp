@@ -25,6 +25,9 @@ class TestPairController(unittest.TestCase):
 		os.environ['AUTH_DOMAIN'] = AUTH_DOMAIN
 		os.environ['USER_EMAIL'] = LOGGED_IN_USER
 		
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		self.date = now.date() # get rid of time information
+		
 		self.user = user = User(email = "test@example.com")
 		category = Category(owner = user)
 		category.name = 'AddTest'
@@ -152,7 +155,7 @@ class TestPairController(unittest.TestCase):
 		self.assertEquals(category.reviewRemaining, 0)
 		self.assertEquals(category.remaining, 1)
 		self.assertEquals(pair.numSuccesses, 1)
-		self.assertEquals(pair.lastSuccess, datetime.date.today())
+		self.assertEquals(pair.lastSuccess, self.date)
 		self.assertEquals(pair.reviewFrequency, 'daily')
 		
 		category.reviewCorrect = 0
@@ -198,8 +201,8 @@ class TestPairController(unittest.TestCase):
 		self.assertEquals(category.correct, 1)
 		self.assertEquals(category.remaining, 0)
 		self.assertEquals(pair.reviewing, True)
-		self.assertEquals(pair.firstSuccess, datetime.date.today())
-		self.assertEquals(pair.lastSuccess, datetime.date.today())
+		self.assertEquals(pair.firstSuccess, self.date)
+		self.assertEquals(pair.lastSuccess, self.date)
 		self.assertEquals(pair.numSuccesses, 1)
 		self.assertEquals(pair.reviewFrequency, 'daily')
 		self.assertEquals(pair.state, 'correct')

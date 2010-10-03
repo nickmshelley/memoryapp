@@ -31,7 +31,8 @@ class TestCategoryController(unittest.TestCase):
 		category = Category(owner = user)
 		category.name = 'SetReviewTest'
 		category.put()
-		date = datetime.date.today()
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		date = now.date() # get rid of time information
 		#not reviewing
 		pair = Pair(owner = user)
 		pair.categories.append(category.key())

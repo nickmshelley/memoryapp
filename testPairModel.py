@@ -14,6 +14,9 @@ class TestPairModel(unittest.TestCase):
 		stub = datastore_file_stub.DatastoreFileStub('memoryapp', '/dev/null', '/dev/null')
 		apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
 		
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		self.date = now.date() # get rid of time information
+		
 		user = user = User(email = "test@foo.com")
 		pair = Pair(owner = user)
 		pair.put()
@@ -123,7 +126,7 @@ class TestPairModel(unittest.TestCase):
 		pairs = Pair.all().fetch(1000)
 		pair = pairs[0]
 		
-		date = datetime.date.today()
+		date = self.date
 		
 		pair.numSuccesses = 0
 		pair.lastSuccess = date - timedelta(8)

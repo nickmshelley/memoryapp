@@ -35,7 +35,8 @@ class TestCategoryModel(unittest.TestCase):
 		category = Category(owner = user)
 		category.name = 'RetrievalTest'
 		category.put()
-		date = datetime.date.today()
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		self.date = date = now.date() # get rid of time information
 		#not reviewing
 		pair = Pair(owner = user)
 		pair.categories.append(category.key())
@@ -412,18 +413,16 @@ class TestCategoryModel(unittest.TestCase):
 		categories = Category.all().filter('name =', 'RetrievalTest').fetch(1000)
 		category = categories[0]
 		
-		date = datetime.date.today()
-		
-		pairs = category.getReviewPairs('daily', date - timedelta(1))
+		pairs = category.getReviewPairs('daily', 1)
 		self.assertEquals(len(pairs), 6)
 		
-		pairs = category.getReviewPairs('weekly', date - timedelta(7))
+		pairs = category.getReviewPairs('weekly', 7)
 		self.assertEquals(len(pairs), 6)
 		
-		pairs = category.getReviewPairs('monthly', date - timedelta(30))
+		pairs = category.getReviewPairs('monthly', 30)
 		self.assertEquals(len(pairs), 6)
 		
-		pairs = category.getReviewPairs('yearly', date - timedelta(365))
+		pairs = category.getReviewPairs('yearly', 365)
 		self.assertEquals(len(pairs), 6)
 		
 	def testDailyReviewPairs(self):

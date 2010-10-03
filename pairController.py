@@ -30,6 +30,8 @@ class AddPairAction(webapp.RequestHandler):
 
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
 		category_key = self.request.get('category')
@@ -43,7 +45,7 @@ class UpdatePairAction(webapp.RequestHandler):
 		elif state == 'correct':
 			if category.reviewing:
 				pair.updateSuccesses()
-				pair.lastSuccess = datetime.date.today()
+				pair.lastSuccess = today
 				pair.setReviewFrequency()
 			category.addCorrect(1)
 		else:
@@ -55,11 +57,13 @@ class UpdatePairAction(webapp.RequestHandler):
 
 class MarkReviewAction(webapp.RequestHandler):
 	def post(self):
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		category_key = self.request.get('category')
 		pair = db.get(pair_key)
 		pair.reviewing = True
-		pair.firstSuccess = datetime.date.today()
+		pair.firstSuccess = today
 		pair.lastSuccess = pair.firstSuccess
 		pair.numSuccesses = 1
 		pair.reviewFrequency = 'daily'

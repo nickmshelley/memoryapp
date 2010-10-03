@@ -21,8 +21,10 @@ class Pair(db.Model):
 	categories = db.ListProperty(db.Key)
 	
 	def updateSuccesses(self):
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		today = now.date() # get rid of time information
 		self.numSuccesses += 1
-		self.lastSuccess = datetime.date.today()
+		self.lastSuccess = today
 		self.setReviewFrequency()
 	
 	def setState(self, state, reviewing):

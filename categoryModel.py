@@ -228,29 +228,31 @@ class Category(db.Model):
 	
 	@property
 	def dailyReviewPairs(self):
-		date = datetime.date.today() - datetime.timedelta(1)
-		pairs = self.getReviewPairs('daily', date)
+		delta = 1
+		pairs = self.getReviewPairs('daily', delta)
 		return pairs
 	
 	@property
 	def weeklyReviewPairs(self):
-		date = datetime.date.today() - datetime.timedelta(7)
-		pairs = self.getReviewPairs('weekly', date)
+		delta = 7
+		pairs = self.getReviewPairs('weekly', delta)
 		return pairs
 	
 	@property
 	def monthlyReviewPairs(self):
-		date = datetime.date.today() - datetime.timedelta(30)
-		pairs = self.getReviewPairs('monthly', date)
+		delta = 30
+		pairs = self.getReviewPairs('monthly', delta)
 		return pairs
 	
 	@property
 	def yearlyReviewPairs(self):
-		date = datetime.date.today() - datetime.timedelta(365)
-		pairs = self.getReviewPairs('yearly', date)
+		delta = 365
+		pairs = self.getReviewPairs('yearly', delta)
 		return pairs
 	
-	def getReviewPairs(self, frequency, date):
+	def getReviewPairs(self, frequency, delta):
+		now = datetime.datetime.now() - datetime.timedelta(days=delta, hours=6) # adjust for utc time
+		date = now.date() # get rid of time information
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('reviewFrequency =', frequency)
 		query.filter('lastSuccess <=', date)

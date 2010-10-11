@@ -38,7 +38,7 @@ class CategoryPage(webapp.RequestHandler):
 				pairs = category.readyPairs
 				index = random.randint(0, len(pairs) - 1)
 				pair = pairs[index]
-			counts = category.getCounts()
+		counts = category.getCounts()
 			
 		self.response.out.write(template.render(path, {'pair': pair,
 														'category_key': category_key,

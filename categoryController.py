@@ -15,14 +15,22 @@ class CategoryPage(webapp.RequestHandler):
 		category_key = self.request.get('id')
 		pairKey = self.request.get('pair')
 		showAnswer = self.request.get('show-answer')
-		category = db.get(category_key)
 		error_message = None
+		category = None
+		reviewing = None
+		try:
+			category = db.get(category_key)
+		except db.BadKeyError:
+			error_message = "Category does not exist"
+		else:
+			reviewing = category.reviewing
+			counts = category.getCounts()
 		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
 		pairs = []
 		pair = None
 		doneReviewing = False
 		if not category:
-			error_message = "Category does not exist"
+			pass
 		elif category.owner != user:
 			error_message = "You do not own this category"
 		elif category.total > 0:
@@ -38,11 +46,11 @@ class CategoryPage(webapp.RequestHandler):
 				pairs = category.readyPairs
 				index = random.randint(0, len(pairs) - 1)
 				pair = pairs[index]
-		counts = category.getCounts()
+				counts = category.getCounts()
 			
 		self.response.out.write(template.render(path, {'pair': pair,
 														'category_key': category_key,
-														'reviewing': category.reviewing,
+														'reviewing': reviewing,
 														'counts': counts,
 														'show_answer': showAnswer,
 														'logout': logout,

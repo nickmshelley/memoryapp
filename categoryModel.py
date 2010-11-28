@@ -251,7 +251,7 @@ class Category(db.Model):
 		return pairs
 	
 	def getReviewPairs(self, frequency, delta):
-		now = datetime.datetime.now() - datetime.timedelta(days=delta, hours=6) # adjust for utc time
+		now = datetime.datetime.now() - datetime.timedelta(days=delta, hours=8) # adjust for utc time
 		date = now.date() # get rid of time information
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('reviewFrequency =', frequency)

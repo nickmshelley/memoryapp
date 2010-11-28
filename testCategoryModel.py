@@ -15,7 +15,7 @@ class TestCategoryModel(unittest.TestCase):
 		stub = datastore_file_stub.DatastoreFileStub('memoryapp', '/dev/null', '/dev/null')
 		apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
 		
-		user = user = User(email = "test@foo.com")
+		user = User(email = "test@foo.com")
 		category = Category(owner = user)
 		category.name = 'MetaTests'
 		category.put()

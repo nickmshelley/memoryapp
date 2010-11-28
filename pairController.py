@@ -30,7 +30,7 @@ class AddPairAction(webapp.RequestHandler):
 
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):
-		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		now = datetime.datetime.now() - datetime.timedelta(hours=8) # adjust for utc time
 		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
@@ -57,7 +57,7 @@ class UpdatePairAction(webapp.RequestHandler):
 
 class MarkReviewAction(webapp.RequestHandler):
 	def post(self):
-		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		now = datetime.datetime.now() - datetime.timedelta(hours=8) # adjust for utc time
 		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		category_key = self.request.get('category')

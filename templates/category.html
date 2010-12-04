@@ -17,10 +17,10 @@
 		<p><strong>{{ error_message }}</strong></p>
 	{% else %}
 		<p><em>Question:</em></p>
-		<p>{{ pair.question }}</p>
+		<p><pre>{{ pair.question }}</pre></p>
 		<p><em>Answer:</em></p>
 		{% if show_answer %}
-			<p>{{ pair.answer }}</p>
+			<p><pre>{{ pair.answer }}</pre></p>
 		{% endif %}
 		<p class="counts">
 			<span>Total: {{ counts.total }}</span>

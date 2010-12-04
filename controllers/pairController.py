@@ -10,7 +10,7 @@ class NewPairForm(webapp.RequestHandler):
 		logout = users.create_logout_url(self.request.uri)
 	
 		category_key = self.request.get('category')
-		path = os.path.join(os.path.dirname(__file__), 'templates/new_pair.html')
+		path = os.path.join(os.path.dirname(__file__), '../templates/new_pair.html')
 		self.response.out.write(template.render(path, {'category_key': category_key,
 														'logout': logout}))
 
@@ -76,4 +76,4 @@ class MarkReviewAction(webapp.RequestHandler):
 		self.redirect('/category?id=' + category_key)
 
 #hack to fix circular import
-from categoryModel import *
+from models.categoryModel import *

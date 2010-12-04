@@ -1,5 +1,5 @@
-from categoryModel import Category
-from pairModel import Pair
+from models.categoryModel import Category
+from models.pairModel import Pair
 import datetime
 from datetime import timedelta
 import unittest

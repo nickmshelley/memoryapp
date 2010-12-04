@@ -4,7 +4,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.api import users
 import os
 import random
-from categoryModel import *
+from models.categoryModel import *
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):
@@ -25,7 +25,7 @@ class CategoryPage(webapp.RequestHandler):
 		else:
 			reviewing = category.reviewing
 			counts = category.getCounts()
-		path = os.path.join(os.path.dirname(__file__), 'templates/category.html')
+		path = os.path.join(os.path.dirname(__file__), '../templates/category.html')
 		pairs = []
 		pair = None
 		doneReviewing = False
@@ -60,7 +60,7 @@ class CategoryPage(webapp.RequestHandler):
 class NewCategoryForm(webapp.RequestHandler):
 	def get(self):
 		logout = users.create_logout_url(self.request.uri)
-		path = os.path.join(os.path.dirname(__file__), 'templates/new_category.html')
+		path = os.path.join(os.path.dirname(__file__), '../templates/new_category.html')
 		self.response.out.write(template.render(path, {'logout': logout}))
 
 class AddCategoryAction(webapp.RequestHandler):

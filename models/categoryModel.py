@@ -1,6 +1,6 @@
 from google.appengine.ext import db
 import datetime
-from pairModel import *
+from models.pairModel import *
 
 # State Pattern classes
 class NonReviewState:

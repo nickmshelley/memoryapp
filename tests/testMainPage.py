@@ -1,4 +1,4 @@
-from categoryModel import Category
+from models.categoryModel import Category
 import unittest
 import os
 from google.appengine.api.users import User

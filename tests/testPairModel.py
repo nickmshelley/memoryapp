@@ -1,4 +1,4 @@
-from pairModel import Pair
+from models.pairModel import Pair
 import unittest
 import datetime
 from datetime import timedelta

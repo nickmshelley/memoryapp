@@ -26,7 +26,33 @@ class AddPairAction(webapp.RequestHandler):
 		category.total += 1
 		category.remaining += 1
 		category.put()
-		self.redirect('/category?id=' + category_key)
+		self.redirect('/category?id=' + category_key  + ';pair=' + str(pair.key()))
+
+class EditPairForm(webapp.RequestHandler):
+	def get(self):
+		logout = users.create_logout_url(self.request.uri)
+		category_key = self.request.get('category')
+		pair_key = self.request.get('pair')
+		pair = db.get(pair_key)
+		question = pair.question
+		answer = pair.answer
+		path = os.path.join(os.path.dirname(__file__), '../templates/edit_pair.html')
+		self.response.out.write(template.render(path, {'category_key': category_key,
+														'pair_key': pair_key,
+														'question': question,
+														'answer': answer,
+														'logout': logout,
+														}))
+
+class EditPairAction(webapp.RequestHandler):
+	def post(self):
+		category_key = self.request.get('category')
+		pair_key = self.request.get('id')
+		pair = db.get(pair_key)
+		pair.question = self.request.get('question')
+		pair.answer = self.request.get('answer')
+		pair.put()
+		self.redirect('/category?id=' + category_key + ';pair=' + pair_key)
 
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):

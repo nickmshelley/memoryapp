@@ -4,6 +4,7 @@ import unittest
 import datetime
 import os
 from datetime import timedelta
+from google.appengine.ext import db
 from google.appengine.api.users import User
 from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import datastore_file_stub
@@ -85,6 +86,11 @@ class TestCategoryController(unittest.TestCase):
 					state = 'correct', reviewState = 'correct')
 		pair.categories.append(category.key())
 		pair.put()
+		
+		category = Category(owner = user)
+		category.name = 'EditTest'
+		category.description = "before description"
+		category.put()
 	
 	def testCategoryPage(self):
 		categories = Category.all().filter('name =', 'Test').fetch(1000)
@@ -255,3 +261,22 @@ class TestCategoryController(unittest.TestCase):
 		categories = Category.all().filter('name =', 'Test').fetch(1000)
 		category = categories[0]
 		self.assertEquals(category.reviewing, False)
+	
+	def testEditCategoryForm(self):
+		categories = Category.all().filter('name =', 'EditTest').fetch(1000)
+		category = categories[0]
+		
+		response = self.app.get('/edit-category?id=' + str(category.key()))
+		self.assertTrue("EditTest" in str(response))
+		self.assertTrue("before description" in str(response))
+	
+	def testEditCategoryAction(self):
+		categories = Category.all().filter('name =', 'EditTest').fetch(1000)
+		category = categories[0]
+		key = category.key()
+		self.app.post('/change-category', {'id': category.key(),
+													'name': "after name",
+													'description': "after description",})
+		category = Category.get(key)
+		self.assertEquals("after name", category.name)
+		self.assertEquals("after description", category.description)

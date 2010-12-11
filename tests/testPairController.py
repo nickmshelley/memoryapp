@@ -41,6 +41,48 @@ class TestPairController(unittest.TestCase):
 		pair = Pair(owner = user)
 		pair.categories.append(category.key())
 		pair.put()
+		
+		category = Category(owner = user)
+		category.name = 'EditTest'
+		category.put()
+		pair = Pair(owner = user)
+		pair.question = "before question"
+		pair.answer = "before answer"
+		pair.categories.append(category.key())
+		pair.put()
+		
+		category = Category(owner = user)
+		category.name = 'DeleteTest'
+		category.total =  6
+		category.missed = 2
+		category.correct = 2
+		category.remaining = 2
+		category.put()
+		# add a couple ready pairs
+		pair = Pair(owner = user)
+		pair.categories.append(category.key())
+		pair.put()
+		pair = Pair(owner = user)
+		pair.categories.append(category.key())
+		pair.put()
+		# add a couple missed pair
+		pair = Pair(owner = user)
+		pair.state = 'missed'
+		pair.categories.append(category.key())
+		pair.put()
+		pair = Pair(owner = user)
+		pair.state = 'missed'
+		pair.categories.append(category.key())
+		pair.put()
+		# add a couple correct pair
+		pair = Pair(owner = user)
+		pair.state = 'correct'
+		pair.categories.append(category.key())
+		pair.put()
+		pair = Pair(owner = user)
+		pair.state = 'correct'
+		pair.categories.append(category.key())
+		pair.put()
 	
 		self.app = TestApp(application)
 	
@@ -206,3 +248,144 @@ class TestPairController(unittest.TestCase):
 		self.assertEquals(pair.numSuccesses, 1)
 		self.assertEquals(pair.reviewFrequency, 'daily')
 		self.assertEquals(pair.state, 'correct')
+	
+	def testEditPairForm(self):
+		categories = Category.all().filter('name =', 'EditTest').fetch(1000)
+		category = categories[0]
+		pairs = category.allPairs
+		pair = pairs[0]
+		
+		response = self.app.get('/edit-pair?pair=' + str(pair.key()) + 
+								';category=' + str(category.key()))
+		self.assertTrue("before question" in str(response))
+		self.assertTrue("before answer" in str(response))
+	
+	def testEditPairAction(self):
+		categories = Category.all().filter('name =', 'EditTest').fetch(1000)
+		category = categories[0]
+		pairs = category.allPairs
+		pair = pairs[0]
+		
+		self.app.post('/change-pair', {'id': pair.key(),
+													'category': category.key(),
+													'question': "after question",
+													'answer': "after answer",})
+		pairs = category.allPairs
+		pair = pairs[0]
+		self.assertEquals("after question", pair.question)
+		self.assertEquals("after answer", pair.answer)
+	
+	#TODO some of this stuff tests the model helper function; consider moving 
+	def testDeletePair(self):
+		# get count before deletions
+		beforeCount = len(Pair.all().fetch(1000))
+		# test delete in normal mode
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		# make sure category counts are what we expect before hand
+		self.assertEquals(category.total, 6)
+		self.assertEquals(category.remaining, 2)
+		self.assertEquals(category.correct, 2)
+		self.assertEquals(category.missed, 2)
+		# make sure pairs in sets are what we expect before hand
+		self.assertEquals(len(category.allPairs), 6)
+		self.assertEquals(len(category.readyPairs), 2)
+		self.assertEquals(len(category.correctPairs), 2)
+		self.assertEquals(len(category.missedPairs), 2)
+		
+		# test deleting a ready pair
+		pairs = category.readyPairs
+		pair = pairs[0]
+		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		pair = Pair.get(pair.key())
+		self.assertEquals(pair, None)
+		# check counts
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		afterCount = len(Pair.all().fetch(1000))
+		self.assertEquals(beforeCount - 1, afterCount)
+		# reset beforeCount for next test
+		beforeCount = afterCount
+		self.assertEquals(category.total, 5)
+		self.assertEquals(category.remaining, 1)
+		self.assertEquals(category.correct, 2)
+		self.assertEquals(category.missed, 2)
+		self.assertEquals(len(category.allPairs), 5)
+		self.assertEquals(len(category.readyPairs), 1)
+		self.assertEquals(len(category.correctPairs), 2)
+		self.assertEquals(len(category.missedPairs), 2)
+		
+		# test deleting a correct pair
+		pairs = category.correctPairs
+		pair = pairs[0]
+		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		pair = Pair.get(pair.key())
+		self.assertEquals(pair, None)
+		# check counts
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		afterCount = len(Pair.all().fetch(1000))
+		self.assertEquals(beforeCount - 1, afterCount)
+		# reset beforeCount for next test
+		beforeCount = afterCount
+		self.assertEquals(category.total, 4)
+		self.assertEquals(category.remaining, 1)
+		self.assertEquals(category.correct, 1)
+		self.assertEquals(category.missed, 2)
+		self.assertEquals(len(category.allPairs), 4)
+		self.assertEquals(len(category.readyPairs), 1)
+		self.assertEquals(len(category.correctPairs), 1)
+		self.assertEquals(len(category.missedPairs), 2)
+		
+		# test deleting a missed pair
+		pairs = category.missedPairs
+		pair = pairs[0]
+		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		pair = Pair.get(pair.key())
+		self.assertEquals(pair, None)
+		# check counts
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		afterCount = len(Pair.all().fetch(1000))
+		self.assertEquals(beforeCount - 1, afterCount)
+		# reset beforeCount for next test
+		beforeCount = afterCount
+		self.assertEquals(category.total, 3)
+		self.assertEquals(category.remaining, 1)
+		self.assertEquals(category.correct, 1)
+		self.assertEquals(category.missed, 1)
+		self.assertEquals(len(category.allPairs), 3)
+		self.assertEquals(len(category.readyPairs), 1)
+		self.assertEquals(len(category.correctPairs), 1)
+		self.assertEquals(len(category.missedPairs), 1)
+		
+		# test that deleting the last ready pair calls reset correctly
+		pairs = category.readyPairs
+		pair = pairs[0]
+		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		self.app.get('/category?id=' + str(category.key()))
+		pair = Pair.get(pair.key())
+		self.assertEquals(pair, None)
+		# check counts
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		afterCount = len(Pair.all().fetch(1000))
+		self.assertEquals(beforeCount - 1, afterCount)
+		# reset beforeCount for next test
+		beforeCount = afterCount
+		self.assertEquals(category.total, 2)
+		self.assertEquals(category.remaining, 1)
+		self.assertEquals(category.correct, 1)
+		self.assertEquals(category.missed, 0)
+		self.assertEquals(len(category.allPairs), 2)
+		self.assertEquals(len(category.readyPairs), 1)
+		self.assertEquals(len(category.correctPairs), 1)
+		self.assertEquals(len(category.missedPairs), 0)
+		
+		# test that delete is not an option in review mode
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		category.reviewing = True
+		category.put()
+		response = self.app.get("/category?id=" + str(category.key()))
+		self.assertFalse("Delete" in str(response))

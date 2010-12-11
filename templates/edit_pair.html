@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css" />
+{% endblock head %}
+
+{% block content %}
+	<form action="/change-pair?id={{ pair_key }}" method="post">
+		<p>Question</p>
+		<p><input type="text" name="question" value="{{ question }}"/></p>
+		<p>Answer</p>
+		<p><textarea name="answer">{{ answer }}</textarea></p>
+		<input type="hidden" name="category" value="{{ category_key }}" />
+		<p><input type="submit" value="Save" /></p>
+	</form>
+{% endblock content %}

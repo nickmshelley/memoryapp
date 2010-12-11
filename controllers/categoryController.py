@@ -74,6 +74,46 @@ class AddCategoryAction(webapp.RequestHandler):
 		category.put()
 		self.redirect('/')
 
+class EditCategoryForm(webapp.RequestHandler):
+	def get(self):
+		key = self.request.get('id')
+		category = db.get(key)
+		name = category.name
+		description = category.description
+		logout = users.create_logout_url(self.request.uri)
+		path = os.path.join(os.path.dirname(__file__), '../templates/edit_category.html')
+		self.response.out.write(template.render(path, {'logout': logout, 
+														'name': name,
+														'description': description,
+														'category_key': key,
+														}))
+
+class EditCategoryAction(webapp.RequestHandler):
+	def post(self):
+		key = self.request.get('id')
+		category = db.get(key)
+		name = self.request.get('name')
+		if len(name) == 0:
+			name = "Untitled Category"
+		category.name = name
+		category.description = self.request.get('description')
+		category.put()
+		self.redirect('/')
+
+class DeletePair(webapp.RequestHandler):
+	def post(self):
+		category_key = self.request.get('category')
+		category = Category.get(category_key)
+		pair_key = self.request.get('pair')
+		pair = Pair.get(pair_key)
+		category.deletePair(pair)
+		category.put()
+		logout = users.create_logout_url(self.request.uri)
+		path = os.path.join(os.paht.dirname(__file__), '../templates/category.html')
+		self.response.out.write(template.render(path, {'logout': logout,
+														'category': category.key()
+														}))
+
 class SetReviewingAction(webapp.RequestHandler):
 	def post(self):
 		category_key = self.request.get('category')

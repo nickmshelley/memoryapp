@@ -299,3 +299,16 @@ class Category(db.Model):
 		if changed:
 			self.setCorrect(0)
 		return changed
+	
+	def deletePair(self, pair):
+		self.total -= 1
+		state = pair.state
+		if state == 'missed':
+			self.addMissed(-1)
+		elif state == 'correct':
+			self.addCorrect(-1)
+		elif state == 'ready':
+			self.addRemaining(-1)
+		else:
+			self.error += 1
+		pair.delete()

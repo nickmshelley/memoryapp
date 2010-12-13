@@ -100,19 +100,22 @@ class EditCategoryAction(webapp.RequestHandler):
 		category.put()
 		self.redirect('/')
 
-class DeletePair(webapp.RequestHandler):
-	def post(self):
-		category_key = self.request.get('category')
-		category = Category.get(category_key)
-		pair_key = self.request.get('pair')
-		pair = Pair.get(pair_key)
-		category.deletePair(pair)
-		category.put()
-		logout = users.create_logout_url(self.request.uri)
-		path = os.path.join(os.paht.dirname(__file__), '../templates/category.html')
-		self.response.out.write(template.render(path, {'logout': logout,
-														'category': category.key()
-														}))
+class DeleteCategory(webapp.RequestHandler):
+	def get(self):
+		key = self.request.get('category')
+		category = Category.get(key)
+		pairs = category.allPairs
+		step = 200
+		length = len(pairs)
+		# delete pairs in chunks of 200 because of GAE time and quantity restrictions
+		for i in range(0, length, step):
+			lower = i
+			upper = i + step
+			if upper > length:
+				upper = length
+			db.delete(pairs[lower:upper])
+		db.delete(category)
+		self.redirect('/')
 
 class SetReviewingAction(webapp.RequestHandler):
 	def post(self):

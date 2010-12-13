@@ -296,7 +296,7 @@ class TestPairController(unittest.TestCase):
 		# test deleting a ready pair
 		pairs = category.readyPairs
 		pair = pairs[0]
-		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		self.app.get('/delete-pair?pair=' + str(pair.key()) + ';category=' + str(category.key()))
 		pair = Pair.get(pair.key())
 		self.assertEquals(pair, None)
 		# check counts
@@ -318,7 +318,7 @@ class TestPairController(unittest.TestCase):
 		# test deleting a correct pair
 		pairs = category.correctPairs
 		pair = pairs[0]
-		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		self.app.get('/delete-pair?pair=' + str(pair.key()) + ';category=' + str(category.key()))
 		pair = Pair.get(pair.key())
 		self.assertEquals(pair, None)
 		# check counts
@@ -340,7 +340,7 @@ class TestPairController(unittest.TestCase):
 		# test deleting a missed pair
 		pairs = category.missedPairs
 		pair = pairs[0]
-		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		self.app.get('/delete-pair?pair=' + str(pair.key()) + ';category=' + str(category.key()))
 		pair = Pair.get(pair.key())
 		self.assertEquals(pair, None)
 		# check counts
@@ -362,7 +362,7 @@ class TestPairController(unittest.TestCase):
 		# test that deleting the last ready pair calls reset correctly
 		pairs = category.readyPairs
 		pair = pairs[0]
-		self.app.post('/delete-pair', {'pair': pair.key(), 'category': category.key()})
+		self.app.get('/delete-pair?pair=' + str(pair.key()) + ';category=' + str(category.key()))
 		self.app.get('/category?id=' + str(category.key()))
 		pair = Pair.get(pair.key())
 		self.assertEquals(pair, None)

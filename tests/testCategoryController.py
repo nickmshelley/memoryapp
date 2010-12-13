@@ -91,6 +91,15 @@ class TestCategoryController(unittest.TestCase):
 		category.name = 'EditTest'
 		category.description = "before description"
 		category.put()
+		
+		category = Category(owner = user)
+		category.name = 'DeleteTest'
+		category.put()
+		# add some pairs
+		for i in range(5):
+			pair = Pair(owner = user)
+			pair.categories.append(category.key())
+			pair.put()
 	
 	def testCategoryPage(self):
 		categories = Category.all().filter('name =', 'Test').fetch(1000)
@@ -280,3 +289,29 @@ class TestCategoryController(unittest.TestCase):
 		category = Category.get(key)
 		self.assertEquals("after name", category.name)
 		self.assertEquals("after description", category.description)
+	
+	def testDeleteCategory(self):
+		# get counts before deletions
+		beforeCardCount = len(Pair.all().fetch(1000))
+		beforeCategoryCount = len(Category.all().fetch(1000))
+		# get category to delete
+		categories = Category.all().filter('name =', 'DeleteTest').fetch(1000)
+		category = categories[0]
+		categoryKey = category.key()
+		# get pair keys
+		pairs = category.allPairs
+		pairKeys = [pair.key() for pair in pairs]
+		# get number of pairs in category
+		toDelete = len(pairs)
+		# perform delete
+		self.app.get('/delete-category?category=' + str(category.key()))
+		# get counts after deletion
+		afterCardCount = len(Pair.all().fetch(1000))
+		afterCategoryCount = len(Category.all().fetch(1000))
+		# make sure numbers match up
+		self.assertEquals(afterCardCount, beforeCardCount - toDelete)
+		self.assertEquals(afterCategoryCount, beforeCategoryCount - 1)
+		#make sure correct items were deleted
+		for key in pairKeys:
+			self.assertEquals(None, Pair.get(key))
+		self.assertEquals(None, Category.get(categoryKey))

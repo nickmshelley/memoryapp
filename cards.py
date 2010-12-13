@@ -31,7 +31,7 @@ application = webapp.WSGIApplication(
 									('/add-category', AddCategoryAction),
 									('/edit-category', EditCategoryForm),
 									('/change-category', EditCategoryAction),
-									#('/delete-category', DeleteCategoryAction),
+									('/delete-category', DeleteCategory),
 									('/new-pair', NewPairForm),
 									('/add-pair', AddPairAction),
 									('/edit-pair', EditPairForm),

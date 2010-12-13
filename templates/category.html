@@ -10,8 +10,8 @@
 			<p>
 				<a href="/new-pair?category={{ category_key }}">New Card</a>
 				<a href="/edit-pair?pair={{ pair.key }};category={{ category_key }}">Edit Card</a>
-				<a href="/delete-pair?pair={{ pair.key }}"
-				   onclick="return confirm('Are you sure you want to delete this pair?')">Delete Pair</a>
+				<a href="/delete-pair?pair={{ pair.key }};category={{ category_key }}"
+				   onclick="return confirm('Are you sure you want to delete this card?')">Delete Card</a>
 			</p>
 		{% endif %}
 	{% endif %}

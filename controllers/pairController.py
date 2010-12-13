@@ -54,6 +54,17 @@ class EditPairAction(webapp.RequestHandler):
 		pair.put()
 		self.redirect('/category?id=' + category_key + ';pair=' + pair_key)
 
+class DeletePair(webapp.RequestHandler):
+	def get(self):
+		category_key = self.request.get('category')
+		category = Category.get(category_key)
+		pair_key = self.request.get('pair')
+		pair = Pair.get(pair_key)
+		category.deletePair(pair)
+		category.put()
+		logout = users.create_logout_url(self.request.uri)
+		self.redirect('/category?id=' + category_key)
+
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):
 		now = datetime.datetime.now() - datetime.timedelta(hours=8) # adjust for utc time

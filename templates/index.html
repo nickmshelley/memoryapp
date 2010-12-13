@@ -21,7 +21,7 @@
 			<td>{{ category.description }}</td>
 			<td>{{ category.owner }}</td>
 			<td><a href="/edit-category?id={{ category.key }}">Edit</a>
-			<td><a href="/delete-category?id={{ category.key }}" 
+			<td><a href="/delete-category?category={{ category.key }}" 
 				   onclick="return confirm('Are you sure you want to delete category &quot;{{ category.name }}&quot; and all its cards?')">Delete</a></td>
 		</tr>
 		{% endfor %}

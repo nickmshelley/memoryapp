@@ -22,10 +22,10 @@
 		<p><strong>{{ error_message }}</strong></p>
 	{% else %}
 		<p><em>Question:</em></p>
-		<p><pre>{{ pair.question }}</pre></p>
+		<p>{{ pair.question|linebreaksbr }}</p>
 		<p><em>Answer:</em></p>
 		{% if show_answer %}
-			<p><pre>{{ pair.answer }}</pre></p>
+			<p>{{ pair.answer|linebreaksbr }}</p>
 		{% endif %}
 		<p class="counts">
 			<span>Total: {{ counts.total }}</span>

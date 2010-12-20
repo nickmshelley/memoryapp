@@ -49,7 +49,7 @@ class CategoryPage(webapp.RequestHandler):
 				counts = category.getCounts()
 			
 		self.response.out.write(template.render(path, {'pair': pair,
-														'category_key': category_key,
+														'category': category,
 														'reviewing': reviewing,
 														'counts': counts,
 														'show_answer': showAnswer,

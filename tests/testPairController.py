@@ -240,14 +240,14 @@ class TestPairController(unittest.TestCase):
 		category = categories[0]
 		pairs = category.allPairs
 		pair = pairs[0]
-		self.assertEquals(category.correct, 1)
-		self.assertEquals(category.remaining, 0)
+		self.assertEquals(category.correct, 0)
+		self.assertEquals(category.remaining, 1)
 		self.assertEquals(pair.reviewing, True)
 		self.assertEquals(pair.firstSuccess, self.date)
 		self.assertEquals(pair.lastSuccess, self.date)
 		self.assertEquals(pair.numSuccesses, 1)
 		self.assertEquals(pair.reviewFrequency, 'daily')
-		self.assertEquals(pair.state, 'correct')
+		self.assertEquals(pair.state, 'ready')
 	
 	def testEditPairForm(self):
 		categories = Category.all().filter('name =', 'EditTest').fetch(1000)

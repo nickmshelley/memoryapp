@@ -104,13 +104,8 @@ class MarkReviewAction(webapp.RequestHandler):
 		pair.lastSuccess = pair.firstSuccess
 		pair.numSuccesses = 1
 		pair.reviewFrequency = 'daily'
-		pair.state = 'correct'
 		pair.put()
-		category = db.get(category_key)
-		category.correct += 1
-		category.remaining -= 1
-		category.put()
-		self.redirect('/category?id=' + category_key)
+		self.redirect('/category?id=' + category_key + '&pair=' + pair_key)
 
 #hack to fix circular import
 from models.categoryModel import *

@@ -15,9 +15,15 @@ from cards import application
 
 class TestCategoryController(unittest.TestCase):
 	def setUp(self):
-		apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
+		if 'datastore' in apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map:
+			del apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map['datastore']
+		if 'datastore_v3' in apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map:
+			del apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map['datastore_v3']
+		if 'user' in apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map:
+			del apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map['user']
+		
 		stub = datastore_file_stub.DatastoreFileStub('memoryapp', '/dev/null', '/dev/null')
-		apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
+		apiproxy_stub_map.apiproxy.RegisterStub('datastore', stub)
 		
 		AUTH_DOMAIN = 'gmail.com' 
 		LOGGED_IN_USER = 'test@example.com'
@@ -315,3 +321,42 @@ class TestCategoryController(unittest.TestCase):
 		for key in pairKeys:
 			self.assertEquals(None, Pair.get(key))
 		self.assertEquals(None, Category.get(categoryKey))
+	
+	def testViewCards(self):
+		#set up a category with a bunch of pairs
+		category = Category(owner = self.user)
+		category.name = 'ViewTest'
+		category.put()
+		pairs = []
+		# add some pairs
+		for i in range(250):
+			pair = Pair(owner = self.user)
+			pair.categories.append(category.key())
+			if i < 100:
+				pair.question = "first"
+				pair.reviewing = True
+			elif i < 200:
+				pair.question = "second"
+			else:
+				pair.question = "third"
+				pair.reviewing = True
+			pair.put()
+		# test first page
+		# default order should have non-reviewing ones first (the second 100)
+		response = str(self.app.get('/view-pairs?category=' + str(category.key())))
+		self.assertFalse('first' in response)
+		self.assertTrue('second' in response)
+		self.assertFalse('third' in response)
+		self.assertTrue('Add to Review Schedule' in response)
+		# test second page
+		response = str(self.app.get('/view-pairs?category=' + str(category.key()) + '&page=next'))
+		self.assertTrue('first' in response)
+		self.assertFalse('second' in response)
+		self.assertFalse('third' in response)
+		self.assertFalse('Add to Review Schedule' in response)
+		# test third page
+		response = str(self.app.get('/view-pairs?category=' + str(category.key()) + '&page=next'))
+		self.assertFalse('first' in response)
+		self.assertFalse('second' in response)
+		self.assertTrue('third' in response)
+		self.assertFalse('Add to Review Schedule' in response)

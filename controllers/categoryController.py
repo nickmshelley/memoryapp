@@ -2,6 +2,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
+from google.appengine.api import memcache
 import os
 import random
 from models.categoryModel import *
@@ -116,6 +117,27 @@ class DeleteCategory(webapp.RequestHandler):
 			db.delete(pairs[lower:upper])
 		db.delete(category)
 		self.redirect('/')
+
+class ViewPairs(webapp.RequestHandler):
+	def get(self):
+		logout = users.create_logout_url(self.request.uri)
+		key = self.request.get('category')
+		page = self.request.get('page')
+		category = Category.get(key)
+		pairQuery = Pair.all().filter('categories =', category.key())
+		pairQuery.order('reviewing')
+		if page == 'next':
+			lastCursor = memcache.get('card_cursor')
+			if lastCursor:
+				pairQuery.with_cursor(lastCursor)
+		pairs = pairQuery.fetch(100)
+		cursor = pairQuery.cursor()
+		memcache.set('card_cursor', cursor)
+		path = os.path.join(os.path.dirname(__file__), '../templates/view_pairs.html')
+		self.response.out.write(template.render(path, {'logout': logout,
+														'pairs': pairs,
+														'category': category,
+														}))
 
 class SetReviewingAction(webapp.RequestHandler):
 	def post(self):

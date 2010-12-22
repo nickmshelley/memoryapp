@@ -2,6 +2,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
+from models.userPreferencesModel import UserPreferences
 import os
 import datetime
 import random
@@ -68,7 +69,9 @@ class DeletePair(webapp.RequestHandler):
 
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):
-		now = datetime.datetime.now() - datetime.timedelta(hours=8) # adjust for utc time
+		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		offset = prefs.timeOffset
+		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
@@ -98,7 +101,9 @@ class UpdatePairAction(webapp.RequestHandler):
 
 class MarkReviewAction(webapp.RequestHandler):
 	def post(self):
-		now = datetime.datetime.now() - datetime.timedelta(hours=8) # adjust for utc time
+		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		offset = prefs.timeOffset
+		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		category_key = self.request.get('category')

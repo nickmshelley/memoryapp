@@ -1,4 +1,5 @@
 from models.pairModel import Pair
+from models.userPreferencesModel import UserPreferences
 from models.categoryModel import Category
 import unittest
 import datetime
@@ -34,6 +35,9 @@ class TestCategoryController(unittest.TestCase):
 		self.user = user = User(email = "test@example.com")
 	
 		self.app = TestApp(application)
+		
+		prefs = UserPreferences(user = user)
+		prefs.put()
 		
 		category = Category(owner = user)
 		category.name = 'Test'
@@ -227,6 +231,8 @@ class TestCategoryController(unittest.TestCase):
 		self.assertTrue("Remaining: 9" in str(response))
 		
 		#test ownership error
+		prefs =  UserPreferences(user = User(email = "notYours@example.com"))
+		prefs.put()
 		os.environ['USER_EMAIL'] = 'notYours@example.com'
 		response = self.app.get("/category?id=" + str(category.key()))
 		self.assertTrue("You do not own this category" in str(response))

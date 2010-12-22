@@ -5,7 +5,9 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from controllers.pairController import *
 from models.categoryModel import *
+from models.userPreferencesModel import *
 from controllers.categoryController import *
+from controllers.userPreferencesController import *
 
 class MainPage(webapp.RequestHandler):
 	def get(self):
@@ -13,6 +15,12 @@ class MainPage(webapp.RequestHandler):
 		categoryQuery = Category.all().filter('owner =', user)
 		categoryQuery.order('name')
 		categories = categoryQuery.fetch(100)
+		
+		# create a preferences object if they don't have one (is there a better place?)
+		prefs = UserPreferences.all().filter('user =', user).fetch(1)
+		if len(prefs) == 0:
+			newPrefs = UserPreferences(user = user)
+			newPrefs.put()
 		
 		logout = users.create_logout_url(self.request.uri)
 		
@@ -42,6 +50,8 @@ application = webapp.WSGIApplication(
 									('/update-pair', UpdatePairAction),
 									('/mark-review', MarkReviewAction),
 									('/set-reviewing', SetReviewingAction),
+									('/edit-settings', EditSettingsForm),
+									('/change-settings', EditSettingsAction),
 									],
 									debug=True)
 

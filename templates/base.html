@@ -5,8 +5,11 @@
 	</head>
 	<body>
 		{% block top_nav %}
-			<p><a href="/">Home</a>
-			<a href="{{ logout }}">logout</a></p>
+			<p>
+				<a href="/">Home</a>
+				<a href="/edit-settings">Settings</a>
+				<a href="{{ logout }}">Logout</a>
+			</p>
 		{% endblock top_nav %}
 
 		{% block nav %}

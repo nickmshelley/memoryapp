@@ -1,5 +1,6 @@
 from models.pairModel import Pair
 from models.categoryModel import Category
+from models.userPreferencesModel import UserPreferences
 import unittest
 import datetime
 import os
@@ -29,6 +30,10 @@ class TestPairController(unittest.TestCase):
 		self.date = now.date() # get rid of time information
 		
 		self.user = user = User(email = "test@example.com")
+		
+		prefs = UserPreferences(user = user)
+		prefs.put()
+		
 		category = Category(owner = user)
 		category.name = 'AddTest'
 		category.put()

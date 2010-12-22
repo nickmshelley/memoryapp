@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css" />
+{% endblock head %}
+
+{% block content %}
+	<h3>Time Offset</h3>
+	<p>Set your time zone offset below.</p>
+	<p>The app decides which questions need reviewing based on the date.
+	However, you may go to bed late and review after midnight, or you may miss a day.
+	You can use this setting to give you extra time, or to make up a missed day.</p>
+	<p>The larger the number you enter, the earlier the app will think it is.
+	In other words, the number you enter will be subtracted from the UTC time ({{ utcTime }} when you loaded this page).
+	Notice that I do not currently take daylight savings into account (sorry, I'll get to it sometime).</p>
+	<p>Example: I live in Utah, so the number 6 or 7 (depending on daylight savings) would make the days start and end at midnight.
+	However, I use an 8 hour offset so the app treats my day as starting and ending at 1 or 2 a.m. in case I review after midight.</p>
+	<p>If you miss a day and want to make it up, put in a number greater than 24 (plus your time zone offset).
+	Remember to change it back when you're done, though.</p>
+	<p>UTC time before offset: {{ utcTime }}</p>
+	<form action="/change-settings" method="post">
+		<p>Offset (hours):
+		<input type="text" size="5" name="offset" value="{{ preferences.timeOffset }}"/></p>
+		<p><input type="submit" value="Save" /></p>
+	</form>
+	<p>Your time after offset: {{ myTime }}</p>
+{% endblock content %}

@@ -1,10 +1,13 @@
 from models.pairModel import Pair
+from models.userPreferencesModel import UserPreferences
 import unittest
 import datetime
+import os
 from datetime import timedelta
 from google.appengine.api.users import User
 from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import datastore_file_stub
+from google.appengine.api import user_service_stub 
 from google.appengine.ext.db import BadValueError
 
 
@@ -14,10 +17,20 @@ class TestPairModel(unittest.TestCase):
 		stub = datastore_file_stub.DatastoreFileStub('memoryapp', '/dev/null', '/dev/null')
 		apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
 		
+		AUTH_DOMAIN = 'gmail.com' 
+		LOGGED_IN_USER = 'test@foo.com'
+		apiproxy_stub_map.apiproxy.RegisterStub('user', user_service_stub.UserServiceStub())
+		os.environ['AUTH_DOMAIN'] = AUTH_DOMAIN
+		os.environ['USER_EMAIL'] = LOGGED_IN_USER
+		
 		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
 		self.date = now.date() # get rid of time information
 		
 		user = user = User(email = "test@foo.com")
+		
+		prefs = UserPreferences(user = user)
+		prefs.put()
+		
 		pair = Pair(owner = user)
 		pair.put()
 	

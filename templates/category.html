@@ -9,8 +9,8 @@
 		{% if not error_message %}
 			<center><h1>{{ category.name }}</h1></center>
 			<p>
-				<a href="/view-pairs?category={{ category.key }}">View Cards</a>
 				<a href="/new-pair?category={{ category.key }}">New Card</a>
+				<a href="/view-pairs?category={{ category.key }}">View Cards</a>
 				<a href="/edit-pair?pair={{ pair.key }};category={{ category.key }}">Edit Card</a>
 				<a href="/delete-pair?pair={{ pair.key }};category={{ category.key }}"
 				   onclick="return confirm('Are you sure you want to delete this card?')">Delete Card</a>

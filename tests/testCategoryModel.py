@@ -1,4 +1,5 @@
 from models.categoryModel import Category
+from models.userPreferencesModel import UserPreferences
 from models.pairModel import Pair
 import datetime
 from datetime import timedelta
@@ -6,6 +7,8 @@ import unittest
 from google.appengine.api.users import User
 from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import datastore_file_stub
+from google.appengine.api import user_service_stub 
+import os
 from google.appengine.ext.db import BadValueError
 
 
@@ -17,7 +20,17 @@ class TestCategoryModel(unittest.TestCase):
 		
 		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
 		self.date = date = now.date() # get rid of time information
+		
+		AUTH_DOMAIN = 'gmail.com' 
+		LOGGED_IN_USER = 'test@foo.com'
+		apiproxy_stub_map.apiproxy.RegisterStub('user', user_service_stub.UserServiceStub())
+		os.environ['AUTH_DOMAIN'] = AUTH_DOMAIN
+		os.environ['USER_EMAIL'] = LOGGED_IN_USER
 		user = User(email = "test@foo.com")
+		
+		prefs = UserPreferences(user = user)
+		prefs.put()
+		
 		category = Category(owner = user)
 		category.name = 'MetaTests'
 		category.put()

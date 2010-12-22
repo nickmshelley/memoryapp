@@ -1,4 +1,6 @@
 from google.appengine.ext import db
+from google.appengine.api import users
+from models.userPreferencesModel import UserPreferences
 import datetime
 
 class Pair(db.Model):
@@ -24,7 +26,10 @@ class Pair(db.Model):
 	categories = db.ListProperty(db.Key)
 	
 	def updateSuccesses(self):
-		now = datetime.datetime.now() - datetime.timedelta(hours=8) # adjust for utc time
+		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		offset = prefs.timeOffset
+		
+		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 		today = now.date() # get rid of time information
 		self.numSuccesses += 1
 		self.lastSuccess = today

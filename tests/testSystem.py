@@ -1,4 +1,5 @@
 from models.categoryModel import Category
+from models.userPreferencesModel import UserPreferences
 from models.pairModel import Pair
 import unittest
 import datetime
@@ -25,6 +26,9 @@ class TestMainPage(unittest.TestCase):
 		os.environ['USER_EMAIL'] = LOGGED_IN_USER
 		
 		self.user = user = User(email = "test@example.com")
+		
+		prefs = UserPreferences(user = user)
+		prefs.put()
 		
 		self.app = TestApp(application)
 	

@@ -2,6 +2,7 @@ from google.appengine.ext import db
 import datetime
 import random
 from models.pairModel import *
+from models.userPreferencesModel import *
 
 # State Pattern classes
 class NonReviewState:
@@ -286,7 +287,9 @@ class Category(db.Model):
 		return pairs
 	
 	def getReviewPairs(self, frequency, delta):
-		now = datetime.datetime.now() - datetime.timedelta(days=delta, hours=8) # adjust for utc time
+		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		offset = prefs.timeOffset
+		now = datetime.datetime.now() - datetime.timedelta(days=delta, hours=offset) # adjust for utc time
 		date = now.date() # get rid of time information
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('reviewFrequency =', frequency)

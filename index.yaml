@@ -30,3 +30,9 @@ indexes:
   properties:
   - name: categories
   - name: reviewing
+
+- kind: Pair
+  properties:
+  - name: categories
+  - name: state
+  - name: order

@@ -4,6 +4,9 @@ import datetime
 class Pair(db.Model):
 	owner = db.UserProperty(required = True)
 	
+	# random number used to create random order (done this way for performance)
+	order = db.IntegerProperty(default = 0)
+	
 	# Pair info
 	question = db.StringProperty()
 	answer = db.TextProperty()

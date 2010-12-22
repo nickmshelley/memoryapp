@@ -38,15 +38,15 @@ class CategoryPage(webapp.RequestHandler):
 			if pairKey:
 				pair = db.get(pairKey)
 			else:
-				pairs = category.readyPairs
-				if len(pairs) == 0:
+				pair = category.nextPair
+				if pair is None:
 					doneReviewing = category.resetPairs()
 					category.put()
 					if doneReviewing:
 						self.redirect('/category?id=' + str(category.key()))
-				pairs = category.readyPairs
-				index = random.randint(0, len(pairs) - 1)
-				pair = pairs[index]
+				pair = category.nextPair
+				if pair is None:
+					print "*********ERROR##########"
 				counts = category.getCounts()
 			
 		self.response.out.write(template.render(path, {'pair': pair,

@@ -4,6 +4,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.api import users
 import os
 import datetime
+import random
 
 class NewPairForm(webapp.RequestHandler):
 	def get(self):
@@ -72,7 +73,10 @@ class UpdatePairAction(webapp.RequestHandler):
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
 		category_key = self.request.get('category')
-		pair = db.get(pair_key)		
+		pair = db.get(pair_key)
+		
+		# update random ordering number
+		pair.order = random.randint(1, 99999)
 		
 		#update category meta information
 		category = db.get(category_key)

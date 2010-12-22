@@ -27,6 +27,7 @@ class TestPairModel(unittest.TestCase):
 		
 		pair = Pair(owner = user)
 		self.assertEquals(pair.owner, user)
+		self.assertEquals(pair.order, 0)
 		self.assertEquals(pair.state, 'ready')
 		self.assertEquals(pair.reviewState, 'ready')
 		self.assertEquals(pair.reviewing, False)

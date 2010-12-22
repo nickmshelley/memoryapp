@@ -123,6 +123,7 @@ class TestPairController(unittest.TestCase):
 		self.assertEquals(category.error, 0)
 		self.assertEquals(pair.state, 'ready')
 		self.assertEquals(pair.reviewState, 'ready')
+		self.assertEquals(pair.order, 0)
 		
 		self.app.post('/update-pair', {'category': category.key(), 'pair': pair.key(),
 										'state': 'missed'})
@@ -132,6 +133,7 @@ class TestPairController(unittest.TestCase):
 		pair = pairs[0]
 		self.assertEquals(pair.reviewState, 'ready')
 		self.assertEquals(pair.state, 'missed')
+		self.assertNotEquals(pair.order, 0)
 		self.assertEquals(category.reviewMissed, 0)
 		self.assertEquals(category.missed, 1)
 		self.assertEquals(category.reviewRemaining, 1)

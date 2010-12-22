@@ -15,6 +15,8 @@ class TestCategoryModel(unittest.TestCase):
 		stub = datastore_file_stub.DatastoreFileStub('memoryapp', '/dev/null', '/dev/null')
 		apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', stub)
 		
+		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
+		self.date = date = now.date() # get rid of time information
 		user = User(email = "test@foo.com")
 		category = Category(owner = user)
 		category.name = 'MetaTests'
@@ -33,10 +35,30 @@ class TestCategoryModel(unittest.TestCase):
 			pair.put()
 		
 		category = Category(owner = user)
+		category.name = 'OrderTest'
+		category.put()
+		pair = Pair(owner = user)
+		pair.categories.append(category.key())
+		pair.order = 1
+		pair.question = "first"
+		pair.put()
+		pair = Pair(owner = user)
+		pair.categories.append(category.key())
+		pair.order = 2
+		pair.question = "second"
+		pair.put()
+		pair = Pair(owner = user)
+		pair.categories.append(category.key())
+		pair.order = 3
+		pair.question = "review"
+		pair.reviewing = True
+		pair.reviewFrequency = 'daily'
+		pair.lastSuccess = date - timedelta(2)
+		pair.put()
+		
+		category = Category(owner = user)
 		category.name = 'RetrievalTest'
 		category.put()
-		now = datetime.datetime.now() - datetime.timedelta(hours=6) # adjust for utc time
-		self.date = date = now.date() # get rid of time information
 		#not reviewing
 		pair = Pair(owner = user)
 		pair.categories.append(category.key())
@@ -209,6 +231,8 @@ class TestCategoryModel(unittest.TestCase):
 		category.reviewMissed = 4
 		category.reviewCorrect = 8
 		category.put()
+		
+		
 		
 	def testCreation(self):
 		user = User(email = "test@foo.com")
@@ -534,6 +558,45 @@ class TestCategoryModel(unittest.TestCase):
 		
 		pairs = category.reviewCorrectPairs
 		self.assertEquals(len(pairs), 8)
+	
+	def testNextPair(self):
+		categories = Category.all().filter('name =', 'OrderTest').fetch(1000)
+		category = categories[0]
+		
+		# make sure it's getting the lowest pair
+		pair = category.nextPair
+		self.assertEquals(pair.question, "first")
+		
+		pair.order = 1000
+		pair.put()
+		pair = category.nextPair
+		self.assertEquals(pair.question, "second")
+		
+		# test when reviewing
+		category.setReviewing()
+		pair = category.nextPair
+		self.assertEquals(pair.question, "review")
+	
+	def testNextNormalPair(self):
+		categories = Category.all().filter('name =', 'OrderTest').fetch(1000)
+		category = categories[0]
+		
+		# make sure it's getting the lowest pair
+		pair = category.nextPair
+		self.assertEquals(pair.question, "first")
+		
+		pair.order = 1000
+		pair.put()
+		pair = category.nextPair
+		self.assertEquals(pair.question, "second")
+	
+	def testNextReviewPair(self):
+		categories = Category.all().filter('name =', 'OrderTest').fetch(1000)
+		category = categories[0]
+		
+		category.setReviewing()
+		pair = category.nextPair
+		self.assertEquals(pair.question, "review")
 	
 	def testResetMissed(self):
 		categories = Category.all().filter('name =', 'RetrievalTest').fetch(1000)

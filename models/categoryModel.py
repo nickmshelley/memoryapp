@@ -1,5 +1,6 @@
 from google.appengine.ext import db
 import datetime
+import random
 from models.pairModel import *
 
 # State Pattern classes
@@ -36,6 +37,9 @@ class NonReviewState:
 	
 	def correctPairs(self, cat):
 		return cat.allCorrectPairs
+	
+	def nextPair(self, cat):
+		return cat.nextNormalPair
 
 class ReviewState:
 	def setMissed(self, cat, num):
@@ -70,6 +74,9 @@ class ReviewState:
 	
 	def correctPairs(self, cat):
 		return cat.reviewCorrectPairs
+	
+	def nextPair(self, cat):
+		return cat.nextReviewPair
 
 # Model class
 class Category(db.Model):
@@ -225,6 +232,34 @@ class Category(db.Model):
 		pairs = [p for p in allPairs if p.reviewState == 'correct']
 		#pairs = filter(lambda p: p.state == 'correct', allPairs)
 		return pairs
+	
+	@property
+	def nextPair(self):
+		state = self.getState()
+		return state.nextPair(self)
+	
+	@property
+	def nextNormalPair(self):
+		query = Pair.all().filter('categories =', self.key())
+		query.filter('state =', 'ready')
+		query.order('order')
+		pairs = query.fetch(1)
+		if len(pairs) == 0:
+			return None
+		else:
+			return pairs[0]
+	
+	#TODO change this to just do one pair once similar to above once query works (issue 33)
+	@property
+	def nextReviewPair(self):
+		allPairs = self.reviewPairs
+		pairs = [p for p in allPairs if p.reviewState == 'ready']
+		if len(pairs) == 0:
+			pair = None
+		else:
+			index = random.randint(0, len(pairs) - 1)
+			pair = pairs[index]
+		return pair
 	
 	@property
 	def dailyReviewPairs(self):

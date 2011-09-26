@@ -75,8 +75,9 @@ class UpdatePairAction(webapp.RequestHandler):
 		category_key = self.request.get('category')
 		pair = db.get(pair_key)
 		
-		# update random ordering number
-		pair.order = random.randint(1, 99999)
+		# update random ordering number if not reviewing
+		if not category.reviewing:
+			pair.order = random.randint(1, 99999)
 		
 		#update category meta information
 		category = db.get(category_key)

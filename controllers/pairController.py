@@ -76,6 +76,7 @@ class UpdatePairAction(webapp.RequestHandler):
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
 		category_key = self.request.get('category')
+		category = db.get(category_key)
 		pair = db.get(pair_key)
 		
 		# update random ordering number if not reviewing
@@ -83,7 +84,6 @@ class UpdatePairAction(webapp.RequestHandler):
 			pair.order = random.randint(1, 99999)
 		
 		#update category meta information
-		category = db.get(category_key)
 		pair.setState(state, category.reviewing)
 		if state == 'missed':
 			category.addMissed(1)

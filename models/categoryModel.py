@@ -171,10 +171,7 @@ class Category(db.Model):
 	
 	@property
 	def reviewPairs(self):
-		pairs = self.dailyReviewPairs + \
-				self.weeklyReviewPairs + \
-				self.monthlyReviewPairs + \
-				self.yearlyReviewPairs
+		pairs = self.getReviewPairs()
 		return pairs
 	
 	@property
@@ -262,38 +259,13 @@ class Category(db.Model):
 			pair = pairs[index]
 		return pair
 	
-	@property
-	def dailyReviewPairs(self):
-		delta = 1
-		pairs = self.getReviewPairs('daily', delta)
-		return pairs
-	
-	@property
-	def weeklyReviewPairs(self):
-		delta = 7
-		pairs = self.getReviewPairs('weekly', delta)
-		return pairs
-	
-	@property
-	def monthlyReviewPairs(self):
-		delta = 30
-		pairs = self.getReviewPairs('monthly', delta)
-		return pairs
-	
-	@property
-	def yearlyReviewPairs(self):
-		delta = 365
-		pairs = self.getReviewPairs('yearly', delta)
-		return pairs
-	
-	def getReviewPairs(self, frequency, delta):
+	def getReviewPairs(self):
 		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
 		offset = prefs.timeOffset
-		now = datetime.datetime.now() - datetime.timedelta(days=delta, hours=offset) # adjust for utc time
+		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 		date = now.date() # get rid of time information
 		query = Pair.all().filter('categories =', self.key())
-		query.filter('reviewFrequency =', frequency)
-		query.filter('lastSuccess <=', date)
+		query.filter('nextReviewDate <=', date)
 		pairs = query.fetch(1000)
 		return pairs
 	

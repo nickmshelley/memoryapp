@@ -47,4 +47,6 @@ class Pair(db.Model):
 	def setNextReview(self):
 		n = self.numSuccesses
 		delta = pow(1.2, n)
+		if delta > 500:
+			delta = 500
 		self.nextReviewDate = self.lastSuccess + datetime.timedelta(days=(int(delta)))

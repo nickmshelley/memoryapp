@@ -26,7 +26,7 @@ class Pair(db.Model):
 	categories = db.ListProperty(db.Key)
 	
 	def updateMisses(self):
-		self.numSuccesses -= 1;
+		self.numSuccesses -= 2;
 	
 	def updateSuccesses(self):
 		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
@@ -47,6 +47,8 @@ class Pair(db.Model):
 	def setNextReview(self):
 		n = self.numSuccesses
 		delta = pow(1.2, n)
-		if delta > 500:
+		if delta < 1:
+			delta = 1
+		elif delta > 500:
 			delta = 500
 		self.nextReviewDate = self.lastSuccess + datetime.timedelta(days=(int(delta)))

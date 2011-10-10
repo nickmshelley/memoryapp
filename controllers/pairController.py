@@ -69,10 +69,6 @@ class DeletePair(webapp.RequestHandler):
 
 class UpdatePairAction(webapp.RequestHandler):
 	def post(self):
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
-		offset = prefs.timeOffset
-		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
-		today = now.date() # get rid of time information
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
 		category_key = self.request.get('category')
@@ -86,12 +82,12 @@ class UpdatePairAction(webapp.RequestHandler):
 		#update category meta information
 		pair.setState(state, category.reviewing)
 		if state == 'missed':
+			if category.reviewing:
+				pair.updateMisses()
 			category.addMissed(1)
 		elif state == 'correct':
 			if category.reviewing:
 				pair.updateSuccesses()
-				pair.lastSuccess = today
-				pair.setReviewFrequency()
 			category.addCorrect(1)
 		else:
 			category.error += 1
@@ -113,7 +109,7 @@ class MarkReviewAction(webapp.RequestHandler):
 		pair.firstSuccess = today
 		pair.lastSuccess = pair.firstSuccess
 		pair.numSuccesses = 1
-		pair.reviewFrequency = 'daily'
+		pair.setNextReview();
 		pair.put()
 		self.redirect('/category?id=' + category_key + '&pair=' + pair_key)
 

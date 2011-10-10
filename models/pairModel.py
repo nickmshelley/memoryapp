@@ -20,10 +20,13 @@ class Pair(db.Model):
 	# Date info
 	firstSuccess = db.DateProperty()
 	lastSuccess = db.DateProperty()
-	reviewFrequency = db.CategoryProperty() #daily, weekly, monthly, yearly
+	nextReviewDate = db.DateProperty()
 	
 	# Category Affiliation
 	categories = db.ListProperty(db.Key)
+	
+	def updateMisses(self):
+		self.numSuccesses -= 1;
 	
 	def updateSuccesses(self):
 		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
@@ -33,7 +36,7 @@ class Pair(db.Model):
 		today = now.date() # get rid of time information
 		self.numSuccesses += 1
 		self.lastSuccess = today
-		self.setReviewFrequency()
+		self.setNextReview()
 	
 	def setState(self, state, reviewing):
 		if reviewing:
@@ -41,15 +44,7 @@ class Pair(db.Model):
 		else:
 			self.state = state
 	
-	def setReviewFrequency(self):
+	def setNextReview(self):
 		n = self.numSuccesses
-		f = ''
-		if n < 8:
-			f = 'daily'
-		elif n < 12:
-			f = 'weekly'
-		elif n < 25:
-			f = 'monthly'
-		else:
-			f = 'yearly'
-		self.reviewFrequency = f
+		delta = pow(1.2, n)
+		self.nextReviewDate = self.lastSuccess + datetime.timedelta(days=(int(delta)))

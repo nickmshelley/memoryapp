@@ -23,6 +23,11 @@ indexes:
 - kind: Pair
   properties:
   - name: categories
+  - name: nextReviewDate
+
+- kind: Pair
+  properties:
+  - name: categories
   - name: reviewFrequency
   - name: lastSuccess
 

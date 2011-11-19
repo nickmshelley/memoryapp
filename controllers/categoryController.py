@@ -163,5 +163,7 @@ class SetReviewingAction(webapp.RequestHandler):
 				category.resetCorrect()
 				category.reviewTotal = size
 				category.reviewRemaining = size
+				category.reviewMissed = 0
+				category.reviewCorrect = 0
 				category.put()
 		self.redirect('/category?id=' + category_key)

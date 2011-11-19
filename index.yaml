@@ -28,6 +28,12 @@ indexes:
 - kind: Pair
   properties:
   - name: categories
+  - name: nextReviewDate
+  - name: numSuccesses
+
+- kind: Pair
+  properties:
+  - name: categories
   - name: reviewFrequency
   - name: lastSuccess
 

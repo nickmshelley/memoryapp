@@ -89,6 +89,7 @@ class UpdatePairAction(webapp.RequestHandler):
 			if category.reviewing:
 				pair.updateSuccesses()
 			category.addCorrect(1)
+			category.addReviewed(1)
 		else:
 			category.error += 1
 		category.addRemaining(-1)	

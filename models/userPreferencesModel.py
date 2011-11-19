@@ -7,3 +7,6 @@ class UserPreferences(db.Model):
 	# offset in hours from UTC time
 	# this number is subtracted from UTC time, so should be positive if going west
 	timeOffset = db.IntegerProperty(default = 8)
+	
+	# limit of how many questions to review per day
+	reviewLimit = db.IntegerProperty(default = 100)

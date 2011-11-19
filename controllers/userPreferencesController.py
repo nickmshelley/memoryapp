@@ -27,8 +27,10 @@ class EditSettingsAction(webapp.RequestHandler):
 	def post(self):
 		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
 		offset = self.request.get('offset')
+		limit = self.request.get('limit')
 		try:
 			prefs.timeOffset = int(offset)
+			prefs.reviewLimit = int(limit)
 			prefs.put()
 		except ValueError:
 			pass

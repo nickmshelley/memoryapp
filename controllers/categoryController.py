@@ -31,7 +31,6 @@ class CategoryPage(webapp.RequestHandler):
 			reviewing = category.reviewing
 			counts = category.getCounts()
 		path = os.path.join(os.path.dirname(__file__), '../templates/category.html')
-		pairs = []
 		pair = None
 		doneReviewing = False
 		if not category:
@@ -153,6 +152,7 @@ class SetReviewingAction(webapp.RequestHandler):
 			category.unsetReviewing()
 			category.put()
 		else:
+			category.reviewedThisSession = 0
 			pairs = category.reviewPairs
 			size = len(pairs)
 			if size > 0:

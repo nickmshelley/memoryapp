@@ -24,6 +24,9 @@ class NonReviewState:
 	def addCorrect(self, cat, num):
 		cat.correct += num
 	
+	def addReviewed(self, cat, num):
+		pass
+	
 	def getCounts(self, cat):
 		return cat.getAllCounts()
 	
@@ -61,6 +64,9 @@ class ReviewState:
 	def addCorrect(self, cat, num):
 		cat.reviewCorrect += num
 	
+	def addReviewed(self, cat, num):
+		cat.reviewedThisSession += num
+	
 	def getCounts(self, cat):
 		return cat.getReviewCounts()
 	
@@ -97,6 +103,7 @@ class Category(db.Model):
 	reviewMissed = db.IntegerProperty(default=0)
 	reviewCorrect = db.IntegerProperty(default=0)
 	reviewRemaining = db.IntegerProperty(default=0)
+	reviewedThisSession = db.IntegerProperty(default=0)
 	error = db.IntegerProperty(default = 0)
 	
 	reviewing = db.BooleanProperty(default=False)
@@ -135,6 +142,10 @@ class Category(db.Model):
 	def addCorrect(self, num):
 		state = self.getState()
 		state.addCorrect(self, num)
+	
+	def addReviewed(self, num):
+		state = self.getState()
+		state.addReviewed(self, num)
 	
 	def getCounts(self):
 		state = self.getState()
@@ -262,11 +273,17 @@ class Category(db.Model):
 	def getReviewPairs(self):
 		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
 		offset = prefs.timeOffset
-		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
-		date = now.date() # get rid of time information
-		query = Pair.all().filter('categories =', self.key())
-		query.filter('nextReviewDate <=', date)
-		pairs = query.fetch(1000)
+		limit = prefs.reviewLimit
+		remaining = limit - self.reviewedThisSession
+		pairs = []
+		if remaining > 0:
+			now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
+			date = now.date() # get rid of time information
+			query = Pair.all().filter('categories =', self.key())
+			query.filter('nextReviewDate <=', date)
+			query.order('nextReviewDate')
+			query.order('numSuccesses')
+			pairs = query.fetch(remaining)
 		return pairs
 	
 	def resetPairs(self):

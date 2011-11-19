@@ -5,23 +5,25 @@
 {% endblock head %}
 
 {% block content %}
-	<h3>Time Offset</h3>
-	<p>Set your time zone offset below.</p>
-	<p>The app decides which questions need reviewing based on the date.
-	However, you may go to bed late and review after midnight, or you may miss a day.
-	You can use this setting to give you extra time, or to make up a missed day.</p>
-	<p>The larger the number you enter, the earlier the app will think it is.
-	In other words, the number you enter will be subtracted from the UTC time ({{ utcTime }} when you loaded this page).
-	Notice that I do not currently take daylight savings into account (sorry, I'll get to it sometime).</p>
-	<p>Example: I live in Utah, so the number 6 or 7 (depending on daylight savings) would make the days start and end at midnight.
-	However, I use an 8 hour offset so the app treats my day as starting and ending at 1 or 2 a.m. in case I review after midight.</p>
-	<p>If you miss a day and want to make it up, put in a number greater than 24 (plus your time zone offset).
-	Remember to change it back when you're done, though.</p>
-	<p>UTC time before offset: {{ utcTime }}</p>
 	<form action="/change-settings" method="post">
+		<h3>Session Review Limit</h3>
+		<p>This specifies the maximum number of questions you want to review per session.</p>
+		<p>Example 1: If I have 20 questions I am supposed to review today but I set my session limit
+		to 10, I will only review the 10 most urgent cards.</p>
+		<p>Example 2: If I have 20 questions I am supposed to review today and my session limit is 30,
+		I will review all 20.</p>
+		<p>Review Limit (number per session):
+			<input type="text" size="5" name="limit" value="{{ preferences.reviewLimit }}"/></p>
+	
+		<h3>Time Offset</h3>
+		<p>This is a poor man's time zone, because it's easier than programming in actual time zones.
+		Type in a number that makes the "Your time after offset" number something you like.</p>
+		<p>Note: because review sessions are based on days, I like to make my time earlier so I can review
+		after midnight and have it count as the same day.</p>
+		<p><a link="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC time</a> before offset: {{ utcTime }}</p>
 		<p>Offset (hours):
-		<input type="text" size="5" name="offset" value="{{ preferences.timeOffset }}"/></p>
+			<input type="text" size="5" name="offset" value="{{ preferences.timeOffset }}"/></p>
+		<p>Your time after offset: {{ myTime }}</p>
 		<p><input type="submit" value="Save" /></p>
 	</form>
-	<p>Your time after offset: {{ myTime }}</p>
 {% endblock content %}

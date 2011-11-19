@@ -15,15 +15,22 @@
 	<p align="right">
 		<a href="/view-pairs?category={{ category.key }}&page=next">next</a>
 	</p>
+	<p>Note: Review level determines when the next review date will be (the higher the number, the later
+	the next review date will be).
+	</p>
 	<table border="1">
 		<tr>
 			<td>Question</td>
 			<td>Answer</td>
+			<td>Next Review Date</td>
+			<td>Review Level</td>
 		</tr>
 		{% for pair in pairs %}
 		<tr>
 			<td>{{ pair.question }}</td>
 			<td>{{ pair.answer }}</td>
+			<td>{{ pair.nextReviewDate }}</td>
+			<td>{{ pair.numSuccesses }}</td>
 			<td><a href="/edit-pair?pair={{ pair.key }};category={{ category.key }}">Edit</a></td>
 			<td><a href="/delete-pair?pair={{ pair.key }};category={{ category.key }}"
 			   onclick="return confirm('Are you sure you want to delete this card?')">Delete</a></td>

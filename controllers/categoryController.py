@@ -130,6 +130,8 @@ class ViewPairs(webapp.RequestHandler):
 		category = Category.get(key)
 		pairQuery = Pair.all().filter('categories =', category.key())
 		pairQuery.order('reviewing')
+		pairQuery.order('nextReviewDate')
+		pairQuery.order('numSuccesses')
 		if page == 'next':
 			lastCursor = memcache.get('card_cursor')
 			if lastCursor:

@@ -45,5 +45,12 @@ indexes:
 - kind: Pair
   properties:
   - name: categories
+  - name: reviewing
+  - name: nextReviewDate
+  - name: numSuccesses
+
+- kind: Pair
+  properties:
+  - name: categories
   - name: state
   - name: order

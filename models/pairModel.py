@@ -27,6 +27,8 @@ class Pair(db.Model):
 	
 	def updateMisses(self):
 		self.numSuccesses -= 2;
+		if self.numSuccesses < 0:
+			self.numSuccesses = 0
 	
 	def updateSuccesses(self):
 		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
@@ -46,7 +48,7 @@ class Pair(db.Model):
 	
 	def setNextReview(self):
 		n = self.numSuccesses
-		delta = pow(1.2, n)
+		delta = pow(1.1, n)
 		if delta < 1:
 			delta = 1
 		elif delta > 500:

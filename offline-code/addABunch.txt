@@ -1,0 +1,22 @@
+from google.appengine.ext import db
+from models.pairModel import *
+from models.categoryModel import *
+
+toAdd = 20
+
+category = Category(owner = users.get_current_user())
+category.name = "Test"
+category.put()
+
+category_key = str(category.key())
+
+for i in range(toAdd):
+	pair = Pair(owner = users.get_current_user())
+	pair.question = "%d" % i
+	pair.answer = "%d" % (i + 1)
+	pair.categories.append(db.Key(category_key))
+	pair.put()
+	category = db.get(category_key)
+	category.total += 1
+	category.remaining += 1
+	category.put()

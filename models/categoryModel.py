@@ -169,6 +169,12 @@ class Category(db.Model):
 				}
 		return counts
 	
+	def getAllFromQuery(self, query):
+		items = []
+		for item in query:
+			items.append(item)
+		return items
+	
 	@property
 	def pairs(self):
 		state = self.getState()
@@ -177,7 +183,7 @@ class Category(db.Model):
 	@property
 	def allPairs(self):
 		query = Pair.all().filter('categories =', self.key())
-		pairs = query.fetch(1000)
+		pairs = self.getAllFromQuery(query)
 		return pairs
 	
 	@property
@@ -194,7 +200,7 @@ class Category(db.Model):
 	def allReadyPairs(self):
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('state =', 'ready')
-		pairs = query.fetch(1000)
+		pairs = self.getAllFromQuery(query)
 		return pairs
 	
 	@property
@@ -213,7 +219,7 @@ class Category(db.Model):
 	def allMissedPairs(self):
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('state =', 'missed')
-		pairs = query.fetch(1000)
+		pairs = self.getAllFromQuery(query)
 		return pairs
 	
 	@property
@@ -232,7 +238,7 @@ class Category(db.Model):
 	def allCorrectPairs(self):
 		query = Pair.all().filter('categories =', self.key())
 		query.filter('state =', 'correct')
-		pairs = query.fetch(1000)
+		pairs = self.getAllFromQuery(query)
 		return pairs
 	
 	@property
@@ -280,6 +286,7 @@ class Category(db.Model):
 			now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 			date = now.date() # get rid of time information
 			query = Pair.all().filter('categories =', self.key())
+			query.filter('reviewing =', True)
 			query.filter('nextReviewDate <=', date)
 			query.order('nextReviewDate')
 			query.order('numSuccesses')

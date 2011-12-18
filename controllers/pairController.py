@@ -53,7 +53,7 @@ class EditPairAction(webapp.RequestHandler):
 		pair = db.get(pair_key)
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
-		pair.put()
+		pair.updateDbAndCache()
 		self.redirect('/category?id=' + category_key + ';pair=' + pair_key)
 
 class DeletePair(webapp.RequestHandler):
@@ -93,13 +93,13 @@ class UpdatePairAction(webapp.RequestHandler):
 		else:
 			category.error += 1
 		category.addRemaining(-1)	
-		pair.put()
+		pair.updateDbAndCache()
 		category.put()
 		self.redirect('/category?id=' + category_key)
 
 class MarkReviewAction(webapp.RequestHandler):
 	def post(self):
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		prefs = UserPreferences.getUserPreferences()
 		offset = prefs.timeOffset
 		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 		today = now.date() # get rid of time information

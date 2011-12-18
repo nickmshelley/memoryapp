@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import memcache
 from google.appengine.api import users
 from models.userPreferencesModel import UserPreferences
 import datetime
@@ -25,13 +26,29 @@ class Pair(db.Model):
 	# Category Affiliation
 	categories = db.ListProperty(db.Key)
 	
+	def updateDbAndCache(self):
+		self.put()
+		for category_key in self.categories:
+			key = str(category_key) + "reviewPairs"
+			pairs = memcache.get(key)
+			if pairs is not None:
+				tempPairs = [p for p in pairs if str(self.key()) == str(p.key())]
+				if len(tempPairs) > 1:
+					print "logic error"
+				try:
+					pairs.remove(tempPairs[0])
+					pairs.append(self)
+					memcache.set(key, pairs)
+				except:
+					pass
+	
 	def updateMisses(self):
 		self.numSuccesses -= 2;
 		if self.numSuccesses < 0:
 			self.numSuccesses = 0
 	
 	def updateSuccesses(self):
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		prefs = UserPreferences.getUserPreferences()
 		offset = prefs.timeOffset
 		
 		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time

@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import memcache
 import datetime
 import random
 from models.pairModel import *
@@ -107,6 +108,10 @@ class Category(db.Model):
 	error = db.IntegerProperty(default = 0)
 	
 	reviewing = db.BooleanProperty(default=False)
+	
+	def getReviewPairsKey(self):
+		return str(self.key()) + "reviewPairs"
+	
 	def getState(self):
 		if self.reviewing:
 			return Category.reviewState
@@ -114,6 +119,8 @@ class Category(db.Model):
 			return Category.nonReviewState
 	
 	def setReviewing(self):
+		key = self.getReviewPairsKey()
+		memcache.delete(key)
 		self.reviewing = True
 	
 	def unsetReviewing(self):
@@ -277,20 +284,23 @@ class Category(db.Model):
 		return pair
 	
 	def getReviewPairs(self):
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
-		offset = prefs.timeOffset
-		limit = prefs.reviewLimit
-		remaining = limit - self.reviewedThisSession
-		pairs = []
-		if remaining > 0:
-			now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
-			date = now.date() # get rid of time information
-			query = Pair.all().filter('categories =', self.key())
-			query.filter('reviewing =', True)
-			query.filter('nextReviewDate <=', date)
-			query.order('nextReviewDate')
-			query.order('numSuccesses')
-			pairs = query.fetch(remaining)
+		key = self.getReviewPairsKey()
+		pairs = memcache.get(key)
+		if pairs is None:
+			prefs = UserPreferences.getUserPreferences()
+			offset = prefs.timeOffset
+			limit = prefs.reviewLimit
+			remaining = limit - self.reviewedThisSession
+			if remaining > 0:
+				now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
+				date = now.date() # get rid of time information
+				query = Pair.all().filter('categories =', self.key())
+				query.filter('reviewing =', True)
+				query.filter('nextReviewDate <=', date)
+				query.order('nextReviewDate')
+				query.order('numSuccesses')
+				pairs = query.fetch(remaining)
+			memcache.set(key, pairs)
 		return pairs
 	
 	def resetPairs(self):
@@ -313,7 +323,7 @@ class Category(db.Model):
 			self.addRemaining(len(pairs))
 			for pair in pairs:
 				pair.setState('ready', self.reviewing)
-				pair.put()
+				pair.updateDbAndCache()
 			pairs = self.missedPairs
 		if changed:
 			self.setMissed(0)
@@ -328,7 +338,7 @@ class Category(db.Model):
 			self.addRemaining(len(pairs))
 			for pair in pairs:
 				pair.setState('ready', self.reviewing)
-				pair.put()
+				pair.updateDbAndCache()
 			pairs = self.correctPairs
 		if changed:
 			self.setCorrect(0)

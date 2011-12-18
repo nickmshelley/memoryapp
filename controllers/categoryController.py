@@ -6,14 +6,10 @@ from google.appengine.api import memcache
 import os
 import random
 from models.categoryModel import *
-from models.userPreferencesModel import *
 
 class CategoryPage(webapp.RequestHandler):
 	def get(self):
 		logout = users.create_logout_url(self.request.uri)
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
-		offset = prefs.timeOffset
-		now = datetime.datetime.now() - datetime.timedelta(hours=offset)
 		
 		counts = None
 		user = users.get_current_user()
@@ -59,7 +55,6 @@ class CategoryPage(webapp.RequestHandler):
 														'show_answer': showAnswer,
 														'logout': logout,
 														'error_message': error_message,
-														'time': now,
 														}))
 
 class NewCategoryForm(webapp.RequestHandler):
@@ -154,11 +149,11 @@ class SetReviewingAction(webapp.RequestHandler):
 			category.unsetReviewing()
 			category.put()
 		else:
+			category.setReviewing()
 			category.reviewedThisSession = 0
 			pairs = category.reviewPairs
 			size = len(pairs)
 			if size > 0:
-				category.setReviewing()
 				category.resetMissed()
 				category.resetCorrect()
 				category.reviewTotal = size
@@ -166,4 +161,6 @@ class SetReviewingAction(webapp.RequestHandler):
 				category.reviewMissed = 0
 				category.reviewCorrect = 0
 				category.put()
+			else:
+				category.unsetReviewing()
 		self.redirect('/category?id=' + category_key)

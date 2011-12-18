@@ -10,7 +10,7 @@ import random
 class EditSettingsForm(webapp.RequestHandler):
 	def get(self):
 		logout = users.create_logout_url(self.request.uri)
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		prefs = UserPreferences.getUserPreferences()
 		offset = prefs.timeOffset
 		path = os.path.join(os.path.dirname(__file__), '../templates/edit_settings.html')
 		utcTime = datetime.datetime.now()
@@ -25,13 +25,13 @@ class EditSettingsForm(webapp.RequestHandler):
 
 class EditSettingsAction(webapp.RequestHandler):
 	def post(self):
-		prefs = UserPreferences.all().filter('user =', users.get_current_user()).fetch(1)[0]
+		prefs = UserPreferences.getUserPreferences()
 		offset = self.request.get('offset')
 		limit = self.request.get('limit')
 		try:
 			prefs.timeOffset = int(offset)
 			prefs.reviewLimit = int(limit)
-			prefs.put()
+			prefs.updateDbAndCache()
 		except ValueError:
 			pass
 		self.redirect('/edit-settings')

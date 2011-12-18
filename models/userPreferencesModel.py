@@ -1,5 +1,6 @@
 from google.appengine.ext import db
-import datetime
+from google.appengine.api import users
+from google.appengine.api import memcache
 
 class UserPreferences(db.Model):
 	user = db.UserProperty(required = True)
@@ -10,3 +11,22 @@ class UserPreferences(db.Model):
 	
 	# limit of how many questions to review per day
 	reviewLimit = db.IntegerProperty(default = 100)
+	
+	@staticmethod
+	def getMemcacheKey():
+		return str(users.get_current_user()) + "userPrefs"
+	
+	def updateDbAndCache(self):
+		self.put()
+		key = self.getMemcacheKey()
+		memcache.set(key, self)
+	
+	@staticmethod
+	def getUserPreferences():
+		user = users.get_current_user()
+		key = UserPreferences.getMemcacheKey()
+		prefs = memcache.get(key)
+		if prefs is None:
+			prefs = UserPreferences.all().filter('user =', user).fetch(1)[0]
+			memcache.set(key, prefs)
+		return prefs

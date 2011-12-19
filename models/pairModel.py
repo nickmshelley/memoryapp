@@ -26,21 +26,37 @@ class Pair(db.Model):
 	# Category Affiliation
 	categories = db.ListProperty(db.Key)
 	
-	def updateDbAndCache(self):
+	def updateDbAndCache(self, category_key):
 		self.put()
-		for category_key in self.categories:
-			key = str(category_key) + "reviewPairs"
-			pairs = memcache.get(key)
-			if pairs is not None:
-				tempPairs = [p for p in pairs if str(self.key()) == str(p.key())]
+		key = str(category_key) + "reviewPairs"
+		pairs = memcache.get(key)
+		if pairs is not None:
+			tempPairs = [p for p in pairs if str(self.key()) == str(p.key())]
+			if len(tempPairs) > 1:
+				print "logic error"
+			try:
+				pairs.remove(tempPairs[0])
+				pairs.append(self)
+				memcache.set(key, pairs)
+			except:
+				pass
+	
+	@staticmethod
+	def updateMultiDbAndCache(pairs, category_key):
+		db.put(pairs)
+		key = str(category_key) + "reviewPairs"
+		cached = memcache.get(key)
+		if cached is not None:
+			for pair in pairs:
+				tempPairs = [p for p in cached if str(pair.key()) == str(p.key())]
 				if len(tempPairs) > 1:
 					print "logic error"
 				try:
-					pairs.remove(tempPairs[0])
-					pairs.append(self)
-					memcache.set(key, pairs)
+					cached.remove(tempPairs[0])
+					cached.append(self)
 				except:
 					pass
+			memcache.set(key, pairs)
 	
 	def updateMisses(self):
 		self.numSuccesses -= 2;

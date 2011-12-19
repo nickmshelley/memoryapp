@@ -323,7 +323,7 @@ class Category(db.Model):
 			self.addRemaining(len(pairs))
 			for pair in pairs:
 				pair.setState('ready', self.reviewing)
-				pair.updateDbAndCache()
+			Pair.updateMultiDbAndCache(pairs, str(self.key()))
 			pairs = self.missedPairs
 		if changed:
 			self.setMissed(0)
@@ -338,7 +338,7 @@ class Category(db.Model):
 			self.addRemaining(len(pairs))
 			for pair in pairs:
 				pair.setState('ready', self.reviewing)
-				pair.updateDbAndCache()
+			Pair.updateMultiDbAndCache(pairs, str(self.key()))
 			pairs = self.correctPairs
 		if changed:
 			self.setCorrect(0)

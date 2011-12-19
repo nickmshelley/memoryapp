@@ -53,7 +53,7 @@ class EditPairAction(webapp.RequestHandler):
 		pair = db.get(pair_key)
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
-		pair.updateDbAndCache()
+		pair.updateDbAndCache(category_key)
 		self.redirect('/category?id=' + category_key + ';pair=' + pair_key)
 
 class DeletePair(webapp.RequestHandler):
@@ -93,7 +93,7 @@ class UpdatePairAction(webapp.RequestHandler):
 		else:
 			category.error += 1
 		category.addRemaining(-1)	
-		pair.updateDbAndCache()
+		pair.updateDbAndCache(category_key)
 		category.put()
 		self.redirect('/category?id=' + category_key)
 

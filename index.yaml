@@ -52,5 +52,11 @@ indexes:
 - kind: Pair
   properties:
   - name: categories
+  - name: reviewing
+  - name: numSuccesses
+
+- kind: Pair
+  properties:
+  - name: categories
   - name: state
   - name: order

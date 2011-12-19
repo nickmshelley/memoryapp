@@ -294,13 +294,24 @@ class Category(db.Model):
 			if remaining > 0:
 				now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 				date = now.date() # get rid of time information
-				query = Pair.all().filter('categories =', self.key())
-				query.filter('reviewing =', True)
-				query.filter('nextReviewDate <=', date)
-				query.order('nextReviewDate')
-				query.order('numSuccesses')
-				pairs = query.fetch(remaining)
-			memcache.set(key, pairs)
+				
+				#get the daily pairs
+				dailyQuery = Pair.all().filter('categories =', self.key())
+				dailyQuery.filter('reviewing =', True)
+				dailyQuery.filter('numSuccesses <', 8)
+				dailyQuery.order('numSuccesses')
+				pairs = dailyQuery.fetch(remaining)
+				pairs = [p for p in pairs if p.nextReviewDate <= date]
+				
+				#get the pairs that are most passed review date
+				if len(pairs) < remaining:
+					query = Pair.all().filter('categories =', self.key())
+					query.filter('reviewing =', True)
+					query.filter('nextReviewDate <=', date)
+					query.order('nextReviewDate')
+					query.order('numSuccesses')
+					pairs.extend(query.fetch(remaining - len(pairs)))
+				memcache.set(key, pairs)
 		return pairs
 	
 	def resetPairs(self):

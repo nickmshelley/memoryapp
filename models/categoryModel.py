@@ -296,9 +296,10 @@ class Category(db.Model):
 				date = now.date() # get rid of time information
 				
 				#get the daily pairs
+				toInclude = 7
 				dailyQuery = Pair.all().filter('categories =', self.key())
 				dailyQuery.filter('reviewing =', True)
-				dailyQuery.filter('numSuccesses <', 8)
+				dailyQuery.filter('numSuccesses <=', toInclude)
 				dailyQuery.order('numSuccesses')
 				pairs = dailyQuery.fetch(remaining)
 				pairs = [p for p in pairs if p.nextReviewDate <= date]
@@ -310,7 +311,10 @@ class Category(db.Model):
 					query.filter('nextReviewDate <=', date)
 					query.order('nextReviewDate')
 					query.order('numSuccesses')
-					pairs.extend(query.fetch(remaining - len(pairs)))
+					newPairs = query.fetch(remaining)
+					newPairs = [p for p in newPairs if p.numSuccesses > toInclude]
+					pairs.extend(newPairs)
+					pairs = pairs[:remaining]
 				memcache.set(key, pairs)
 		return pairs
 	
@@ -329,13 +333,12 @@ class Category(db.Model):
 		pairs = self.missedPairs
 		self.setRemaining(0)
 		changed = False
-		while len(pairs) > 0:
+		if len(pairs) > 0:
 			changed = True
 			self.addRemaining(len(pairs))
 			for pair in pairs:
 				pair.setState('ready', self.reviewing)
 			Pair.updateMultiDbAndCache(pairs, str(self.key()))
-			pairs = self.missedPairs
 		if changed:
 			self.setMissed(0)
 		return changed
@@ -344,13 +347,12 @@ class Category(db.Model):
 		pairs = []
 		pairs = self.correctPairs
 		changed = False
-		while len(pairs) > 0:
+		if len(pairs) > 0:
 			changed = True
 			self.addRemaining(len(pairs))
 			for pair in pairs:
 				pair.setState('ready', self.reviewing)
 			Pair.updateMultiDbAndCache(pairs, str(self.key()))
-			pairs = self.correctPairs
 		if changed:
 			self.setCorrect(0)
 		return changed

@@ -33,7 +33,7 @@ class Pair(db.Model):
 		if pairs is not None:
 			tempPairs = [p for p in pairs if str(self.key()) == str(p.key())]
 			if len(tempPairs) > 1:
-				print "logic error"
+				print "should only match one but matches %d" % len(tempPairs)
 			try:
 				pairs.remove(tempPairs[0])
 				pairs.append(self)
@@ -49,14 +49,14 @@ class Pair(db.Model):
 		if cached is not None:
 			for pair in pairs:
 				tempPairs = [p for p in cached if str(pair.key()) == str(p.key())]
-				if len(tempPairs) > 1:
-					print "logic error"
+				if len(tempPairs) != 1:
+					print "should only match one but matches %d" % len(tempPairs)
 				try:
 					cached.remove(tempPairs[0])
-					cached.append(self)
+					cached.append(pair)
 				except:
 					pass
-			memcache.set(key, pairs)
+			memcache.set(key, cached)
 	
 	def updateMisses(self):
 		self.numSuccesses -= 2;

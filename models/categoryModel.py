@@ -301,8 +301,9 @@ class Category(db.Model):
 				dailyQuery.filter('reviewing =', True)
 				dailyQuery.filter('numSuccesses <=', toInclude)
 				dailyQuery.order('numSuccesses')
-				pairs = dailyQuery.fetch(remaining)
+				pairs = self.getAllFromQuery(dailyQuery)
 				pairs = [p for p in pairs if p.nextReviewDate <= date]
+				pairs = pairs[:remaining]
 				
 				#get the pairs that are most passed review date
 				if len(pairs) < remaining:

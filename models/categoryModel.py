@@ -295,27 +295,23 @@ class Category(db.Model):
 				now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
 				date = now.date() # get rid of time information
 				
-				#get the daily pairs
-				toInclude = 7
-				dailyQuery = Pair.all().filter('categories =', self.key())
-				dailyQuery.filter('reviewing =', True)
-				dailyQuery.filter('numSuccesses <=', toInclude)
-				dailyQuery.order('numSuccesses')
-				pairs = self.getAllFromQuery(dailyQuery)
-				pairs = [p for p in pairs if p.nextReviewDate <= date]
-				pairs = pairs[:remaining]
-				
 				#get the pairs that are most passed review date
-				if len(pairs) < remaining:
-					query = Pair.all().filter('categories =', self.key())
-					query.filter('reviewing =', True)
-					query.filter('nextReviewDate <=', date)
-					query.order('nextReviewDate')
-					query.order('numSuccesses')
-					newPairs = query.fetch(remaining)
-					newPairs = [p for p in newPairs if p.numSuccesses > toInclude]
-					pairs.extend(newPairs)
-					pairs = pairs[:remaining]
+				oldestPercent = .2
+				oldest = int(remaining * oldestPercent)
+				query = Pair.all().filter('categories =', self.key())
+				query.filter('reviewing =', True)
+				query.filter('nextReviewDate <=', date)
+				query.order('nextReviewDate')
+				query.order('numSuccesses')
+				allPairs = self.getAllFromQuery(query)
+				pairs = allPairs[:oldest]
+				
+				#get pairs with lowest numSuccesses
+				allPairs = allPairs[oldest:] #take out used pairs
+				allPairs = sorted(allPairs, key=lambda pair: pair.numSuccesses) #sort by numSuccesses
+				whatsLeft = remaining - oldest
+				pairs.extend(allPairs[:whatsLeft])
+				
 				memcache.set(key, pairs)
 		return pairs
 	

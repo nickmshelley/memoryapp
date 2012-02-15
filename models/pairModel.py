@@ -49,7 +49,7 @@ class Pair(db.Model):
 		if cached is not None:
 			for pair in pairs:
 				tempPairs = [p for p in cached if str(pair.key()) == str(p.key())]
-				if len(tempPairs) != 1:
+				if len(tempPairs) > 1:
 					print "should only match one but matches %d" % len(tempPairs)
 				try:
 					cached.remove(tempPairs[0])

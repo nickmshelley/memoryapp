@@ -140,6 +140,51 @@ class ViewPairs(webapp.RequestHandler):
 														'category': category,
 														}))
 
+class ViewStats(webapp.RequestHandler):
+	def get(self):
+		prefs = UserPreferences.getUserPreferences()
+		offset = prefs.timeOffset
+		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
+		today = now.date() # get rid of time information
+		logout = users.create_logout_url(self.request.uri)
+		key = self.request.get('category')
+		category = Category.get(key)
+		pairs = category.allPairs
+		reviewLevel = {}
+		days = {}
+		averages = {}
+		for n in range(max(pairs, key=lambda x: x.numSuccesses).numSuccesses + 1):
+			reviewLevel[n] = filter(lambda x: x.numSuccesses == n, pairs)
+		reviewLevelList = []
+		total = 0
+		for n in reviewLevel.keys():
+			#review level stuff
+			l = reviewLevel[n]
+			num = len(l)
+			reviewLevelList.append((n, num, 
+									len(filter(lambda x: x.nextReviewDate <= today, l)),
+									len(filter(lambda x: x.nextReviewDate > today, l))))
+			total += num * n
+			#days stuff
+			delta = int(pow(1.1, n))
+			if not delta in days:
+				days[delta] = num
+			else:
+				days[delta] += num
+		averages['reviewLevel'] = total / len(pairs)
+		averages['days'] = sum(days.values())
+		numCards = 0.0
+		for n in days.keys():
+			numCards += days[n] / float(n)
+		averages['cards'] = numCards
+		path = os.path.join(os.path.dirname(__file__), '../templates/view_stats.html')
+		self.response.out.write(template.render(path, {'logout': logout,
+														'reviewLevel': reviewLevelList,
+														'days': days,
+														'averages': averages,
+														'category': category,
+														}))
+
 class SetReviewingAction(webapp.RequestHandler):
 	def post(self):
 		category_key = self.request.get('category')

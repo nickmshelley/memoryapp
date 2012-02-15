@@ -46,6 +46,7 @@ application = webapp.WSGIApplication(
 									('/change-pair', EditPairAction),
 									('/delete-pair', DeletePair),
 									('/view-pairs', ViewPairs),
+									('/view-stats', ViewStats),
 									('/category', CategoryPage),
 									('/update-pair', UpdatePairAction),
 									('/mark-review', MarkReviewAction),

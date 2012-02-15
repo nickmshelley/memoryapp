@@ -1,0 +1,29 @@
+from google.appengine.ext import db
+from models.pairModel import *
+from models.categoryModel import *
+from random import randint
+import datetime
+
+toAdd = 200
+
+category = Category(owner = users.get_current_user())
+category.name = "Test"
+category.put()
+
+category_key = str(category.key())
+
+for i in range(toAdd):
+	pair = Pair(owner = users.get_current_user())
+	pair.question = "%d" % i
+	pair.answer = "%d" % (i + 1)
+	pair.numSuccesses = randint(0, 50)
+	now = datetime.datetime.now()
+	today = now.date()
+	pair.nextReviewDate = today + datetime.timedelta(days=(randint(-50, 50)))
+	pair.categories.append(db.Key(category_key))
+	pair.reviewing = True
+	pair.put()
+	category = db.get(category_key)
+	category.total += 1
+	category.remaining += 1
+	category.put()

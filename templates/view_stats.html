@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<link type="text/css" rel="stylesheet" href="stylesheets/main.css" />
+{% endblock head %}
+
+{% block nav %}
+	<p>
+		<a href="/view-pairs?category={{ category.key }}">View Cards</a>
+	</p>
+{% endblock nav %}
+
+{% block content %}
+	<p align="right">
+		<a href="/view-pairs?category={{ category.key }}&page=next">next</a>
+	</p>
+	<p>Note: Review level determines when the next review date will be (the higher the number, the later
+	the next review date will be).
+	</p>
+	<p>
+		<h3>Review Level</h3>
+	</p>
+	<p>
+		Average review level: {{ averages.reviewLevel }}
+	</p>
+	<table border="1">
+		<tr>
+			<td>Review Level</td>
+			<td>Total</td>
+			<td>Needs Review</td>
+			<td>Future Review</td>
+		</tr>
+		{% for t in reviewLevel %}
+		<tr>
+			<td>{{ t.0 }}</td>
+			<td>{{ t.1 }}</td>
+			<td>{{ t.2 }}</td>
+			<td>{{ t.3 }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	
+	<p>
+		<h3>Days Between Reviews</h3>
+	</p>
+	<p>
+		Average number of days between reviews: {{ averages.days }}
+	</p>
+	<p>
+		Average cards to review per day: {{ averages.cards|floatformat }}
+	</p>
+	<table border="1">
+		<tr>
+			<td>Day Difference</td>
+			<td>Total</td>
+			<!--<td>Needs Review</td>
+			<td>Future Review</td>-->
+		</tr>
+		{% for key in days.items %}
+		<tr>
+			<td>{{ key.0 }}</td>
+			<td>{{ key.1 }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock content %}

@@ -21,7 +21,7 @@
 		<h3>Review Level</h3>
 	</p>
 	<p>
-		Average review level: {{ averages.reviewLevel }}
+		Average review level: {{ averages.reviewLevel|floatformat }}
 	</p>
 	<table border="1">
 		<tr>
@@ -44,7 +44,7 @@
 		<h3>Days Between Reviews</h3>
 	</p>
 	<p>
-		Average number of days between reviews: {{ averages.days }}
+		Average number of days between reviews: {{ averages.days|floatformat }}
 	</p>
 	<p>
 		Average cards to review per day: {{ averages.cards|floatformat }}

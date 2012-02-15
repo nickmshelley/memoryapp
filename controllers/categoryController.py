@@ -157,6 +157,7 @@ class ViewStats(webapp.RequestHandler):
 			reviewLevel[n] = filter(lambda x: x.numSuccesses == n, pairs)
 		reviewLevelList = []
 		total = 0
+		daysTotal = 0.0
 		for n in reviewLevel.keys():
 			#review level stuff
 			l = reviewLevel[n]
@@ -171,8 +172,9 @@ class ViewStats(webapp.RequestHandler):
 				days[delta] = num
 			else:
 				days[delta] += num
-		averages['reviewLevel'] = total / len(pairs)
-		averages['days'] = sum(days.values())
+			daysTotal += delta * float(num)
+		averages['reviewLevel'] = total / float(len(pairs))
+		averages['days'] = daysTotal / float(len(pairs))
 		numCards = 0.0
 		for n in days.keys():
 			numCards += days[n] / float(n)

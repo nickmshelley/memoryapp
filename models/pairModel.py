@@ -42,8 +42,8 @@ class Pair(db.Model):
 				pass
 	
 	def insertAfterMissed(self, pairs):
-		for i in range(length(pairs)):
-			if pairs.state == 'ready':
+		for i in range(len(pairs)):
+			if pairs[i].state == 'ready':
 				pairs.insert(i, self)
 				break
 	

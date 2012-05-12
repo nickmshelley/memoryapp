@@ -42,6 +42,7 @@ class Category(db.Model):
 			pair = None
 		else:
 			index = int(pow(random.random(), 2) * len(pairs))
+			#print index
 			pair = pairs[index]
 		return pair
 	
@@ -69,5 +70,7 @@ class Category(db.Model):
 			#for pair in pairs:
 			#	print "%s-%d" % (pair.state, (pair.numSuccesses - (date - pair.nextReviewDate).days))
 			
-			memcache.set(key, pairs[:500])
+			#to avoid memcache size limit
+			pairs = pairs[:500]
+			memcache.set(key, pairs)
 		return pairs

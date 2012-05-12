@@ -18,11 +18,6 @@ indexes:
 - kind: Pair
   properties:
   - name: categories
-  - name: lastSuccess
-
-- kind: Pair
-  properties:
-  - name: categories
   - name: nextReviewDate
 
 - kind: Pair
@@ -30,21 +25,3 @@ indexes:
   - name: categories
   - name: nextReviewDate
   - name: numSuccesses
-
-- kind: Pair
-  properties:
-  - name: categories
-  - name: reviewFrequency
-  - name: lastSuccess
-
-- kind: Pair
-  properties:
-  - name: categories
-  - name: reviewing
-  - name: nextReviewDate
-
-- kind: Pair
-  properties:
-  - name: categories
-  - name: state
-  - name: order

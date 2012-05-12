@@ -6,19 +6,24 @@
 
 {% block nav %}
 	<p>
+		<a href="/start-review?id={{ category.key }}">Review Cards</a>
+		<a href="/view-stats?category={{ category.key }}">Category Stats</a>
 		<a href="/view-pairs?category={{ category.key }}">View Cards</a>
+		<a href="/new-pair?category={{ category.key }}">New Card</a>
 	</p>
 {% endblock nav %}
 
 {% block content %}
-	<p align="right">
-		<a href="/view-pairs?category={{ category.key }}&page=next">next</a>
+	<p>
+		Total Cards in Category: {{ totals.total }}<br />
+		Cards Ready to Review: {{ totals.reviewTotal }}
+	</p>
+
+	<p>
+		<h3>Review Level</h3>
 	</p>
 	<p>Note: Review level determines when the next review date will be (the higher the number, the later
 	the next review date will be).
-	</p>
-	<p>
-		<h3>Review Level</h3>
 	</p>
 	<p>
 		Average review level: {{ averages.reviewLevel|floatformat }}

@@ -21,7 +21,6 @@ for i in range(toAdd):
 	today = now.date()
 	pair.nextReviewDate = today + datetime.timedelta(days=(randint(-50, 50)))
 	pair.categories.append(db.Key(category_key))
-	pair.reviewing = True
 	pair.put()
 	category = db.get(category_key)
 	category.total += 1

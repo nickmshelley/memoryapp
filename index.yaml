@@ -41,19 +41,7 @@ indexes:
   properties:
   - name: categories
   - name: reviewing
-
-- kind: Pair
-  properties:
-  - name: categories
-  - name: reviewing
   - name: nextReviewDate
-  - name: numSuccesses
-
-- kind: Pair
-  properties:
-  - name: categories
-  - name: reviewing
-  - name: numSuccesses
 
 - kind: Pair
   properties:

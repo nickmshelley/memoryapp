@@ -9,9 +9,6 @@ class UserPreferences(db.Model):
 	# this number is subtracted from UTC time, so should be positive if going west
 	timeOffset = db.IntegerProperty(default = 8)
 	
-	# limit of how many questions to review per day
-	reviewLimit = db.IntegerProperty(default = 100)
-	
 	@staticmethod
 	def getMemcacheKey():
 		return str(users.get_current_user()) + "userPrefs"

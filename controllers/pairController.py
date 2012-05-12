@@ -18,17 +18,18 @@ class NewPairForm(webapp.RequestHandler):
 
 class AddPairAction(webapp.RequestHandler):
 	def post(self):
+		prefs = UserPreferences.getUserPreferences()
+		offset = prefs.timeOffset
+		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
+		today = now.date() # get rid of time information
 		category_key = self.request.get('category')
 		pair = Pair(owner = users.get_current_user())
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
+		pair.nextReviewDate = today
 		pair.categories.append(db.Key(category_key))
 		pair.put()
-		category = db.get(category_key)
-		category.total += 1
-		category.remaining += 1
-		category.put()
-		self.redirect('/category?id=' + category_key  + ';pair=' + str(pair.key()))
+		self.redirect('/view-stats?category=' + category_key)
 
 class EditPairForm(webapp.RequestHandler):
 	def get(self):
@@ -54,16 +55,16 @@ class EditPairAction(webapp.RequestHandler):
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
 		pair.updateDbAndCache(category_key)
+		#refresh cache to show update
+		category = db.get(category_key)
+		memcache.delete(category.getReviewPairsKey())
 		self.redirect('/category?id=' + category_key + ';pair=' + pair_key)
 
 class DeletePair(webapp.RequestHandler):
 	def get(self):
-		category_key = self.request.get('category')
-		category = Category.get(category_key)
 		pair_key = self.request.get('pair')
 		pair = Pair.get(pair_key)
-		category.deletePair(pair)
-		category.put()
+		pair.delete()
 		logout = users.create_logout_url(self.request.uri)
 		self.redirect('/category?id=' + category_key)
 
@@ -72,47 +73,11 @@ class UpdatePairAction(webapp.RequestHandler):
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
 		category_key = self.request.get('category')
-		category = db.get(category_key)
 		pair = db.get(pair_key)
 		
-		# update random ordering number if not reviewing
-		if not category.reviewing:
-			pair.order = random.randint(1, 99999)
-		
-		#update category meta information
-		pair.setState(state, category.reviewing)
-		if state == 'missed':
-			if category.reviewing:
-				pair.updateMisses()
-			category.addMissed(1)
-		elif state == 'correct':
-			if category.reviewing:
-				pair.updateSuccesses()
-			category.addCorrect(1)
-			category.addReviewed(1)
-		else:
-			category.error += 1
-		category.addRemaining(-1)	
+		pair.setState(state)
 		pair.updateDbAndCache(category_key)
-		category.put()
 		self.redirect('/category?id=' + category_key)
-
-class MarkReviewAction(webapp.RequestHandler):
-	def post(self):
-		prefs = UserPreferences.getUserPreferences()
-		offset = prefs.timeOffset
-		now = datetime.datetime.now() - datetime.timedelta(hours=offset) # adjust for utc time
-		today = now.date() # get rid of time information
-		pair_key = self.request.get('pair')
-		category_key = self.request.get('category')
-		pair = db.get(pair_key)
-		pair.reviewing = True
-		pair.firstSuccess = today
-		pair.lastSuccess = pair.firstSuccess
-		pair.numSuccesses = 1
-		pair.setNextReview();
-		pair.put()
-		self.redirect('/category?id=' + category_key + '&pair=' + pair_key)
 
 #hack to fix circular import
 from models.categoryModel import *

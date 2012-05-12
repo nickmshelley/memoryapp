@@ -6,15 +6,6 @@
 
 {% block content %}
 	<form action="/change-settings" method="post">
-		<h3>Session Review Limit</h3>
-		<p>This specifies the maximum number of questions you want to review per session.</p>
-		<p>Example 1: If I have 20 questions I am supposed to review today but I set my session limit
-		to 10, I will only review the 10 most urgent cards.</p>
-		<p>Example 2: If I have 20 questions I am supposed to review today and my session limit is 30,
-		I will review all 20.</p>
-		<p>Review Limit (number per session):
-			<input type="text" size="5" name="limit" value="{{ preferences.reviewLimit }}"/></p>
-	
 		<h3>Time Offset</h3>
 		<p>This is a poor man's time zone, because it's easier than programming in actual time zones.
 		Type in a number that makes the "Your time after offset" number something you like.</p>

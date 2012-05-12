@@ -5,70 +5,41 @@
 {% endblock head %}
 
 {% block nav %}
-	{% if not reviewing %}
-		{% if not error_message %}
-			<center><h1>{{ category.name }}</h1></center>
-			<p>
-				<a href="/new-pair?category={{ category.key }}">New Card</a>
-				<a href="/view-pairs?category={{ category.key }}">View Cards</a>
-				<a href="/edit-pair?pair={{ pair.key }};category={{ category.key }}">Edit Card</a>
-				<a href="/delete-pair?pair={{ pair.key }};category={{ category.key }}"
-				   onclick="return confirm('Are you sure you want to delete this card?')">Delete Card</a>
-			</p>
-		{% endif %}
-	{% endif %}
+	<center><h1>{{ category.name }}</h1></center>
+	<p>
+		<a href="/view-stats?category={{ category.key }}">Category Stats</a>
+		<a href="/view-pairs?category={{ category.key }}">View Cards</a>
+		<a href="/edit-pair?pair={{ pair.key }};category={{ category.key }}">Edit Card</a>
+	</p>
 {% endblock nav %}
 
 {% block content %}
-	{% if error_message %}
-		<p><strong>{{ error_message }}</strong></p>
-	{% else %}
-		<p><em>Question:</em></p>
-		<p>{{ pair.question|linebreaksbr }}</p>
+	<p><em>Question:</em></p>
+	<p>{{ pair.question|linebreaksbr }}</p>
+	{% if show_answer %}
 		<p><em>Answer:</em></p>
-		{% if show_answer %}
-			<p>{{ pair.answer|linebreaksbr }}</p>
-		{% endif %}
-		<p class="counts">
-			<span>Total: {{ counts.total }}</span>
-			<span>Remaining: {{counts.remaining }}</span>
-			<span>Correct: {{ counts.correct }}</span>
-			<span>Missed: {{ counts.missed }}</span>
-		</p>
-		
-		{% if pair %}
-		<div class="buttons">
-			<a href="/category?id={{ category.key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
-			<form action="/update-pair" method="post">
-				<input type="hidden" name="pair" value="{{ pair.key }}" />
-				<input type="hidden" name="state" value="correct" />
-				<input type="hidden" name="category" value="{{ category.key }}" />
-				<input type="submit" value="Correct" />
-			</form>
-			<form action="/update-pair" method="post">
-				<input type="hidden" name="pair" value="{{ pair.key }}" />
-				<input type="hidden" name="state" value="missed" />
-				<input type="hidden" name="category" value="{{ category.key }}" />
-				<input type="submit" value="Missed" />
-			</form>
-			{% if not pair.reviewing %}
-			<form action="/mark-review" method="post">
-				<input type="hidden" name="pair" value="{{ pair.key }}" />
-				<input type="hidden" name="category" value="{{ category.key }}" />
-				<input type="submit" value="Add to Review Schedule" />
-			</form>
-			{% endif %}
-		</div>
-		{% endif %}
-		<br />
-		<form action="/set-reviewing" method="post">
-			<input type="hidden" name="category" value="{{ category.key }}" />
-			<input type="hidden" name="reviewing" value="{{ reviewing }}" />
-			{% if reviewing %}
-				<input type="submit" value="Exit Review" />
-			{% else %}
-				<input type="submit" value="Review Category" />
-			{% endif %}
-		</form>
+		<p>{{ pair.answer|linebreaksbr }}</p>
 	{% endif %}
+	
+	{% if pair %}
+	<div class="buttons">
+		<a href="/category?id={{ category.key }};pair={{ pair.key }};show-answer=True">Show Answer</a>
+		<form action="/update-pair" method="post">
+			<input type="hidden" name="pair" value="{{ pair.key }}" />
+			<input type="hidden" name="state" value="ready" />
+			<input type="hidden" name="category" value="{{ category.key }}" />
+			<input type="submit" value="Correct" />
+		</form>
+		<form action="/update-pair" method="post">
+			<input type="hidden" name="pair" value="{{ pair.key }}" />
+			<input type="hidden" name="state" value="missed" />
+			<input type="hidden" name="category" value="{{ category.key }}" />
+			<input type="submit" value="Missed" />
+		</form>
+	</div>
+	{% endif %}
+	<br />
+	<p class="counts">
+		<span>Remaining: {{ remaining }}</span>
+	</p>
 {% endblock content %}

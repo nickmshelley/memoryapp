@@ -13,9 +13,7 @@ class Pair(db.Model):
 	# Pair info
 	question = db.StringProperty()
 	answer = db.TextProperty()
-	state = db.CategoryProperty(default = 'ready') #missed, correct, ready, etc.
-	reviewState = db.CategoryProperty(default = 'ready') #same as above but used in review mode
-	reviewing = db.BooleanProperty(default = False)
+	state = db.CategoryProperty(default = 'ready') #missed or ready
 	numSuccesses = db.IntegerProperty(default = 0)
 	
 	# Date info
@@ -36,27 +34,18 @@ class Pair(db.Model):
 				print "should only match one but matches %d" % len(tempPairs)
 			try:
 				pairs.remove(tempPairs[0])
-				pairs.append(self)
+				#insert at end of missed
+				if self.state == 'missed':
+					self.insertAfterMissed(pairs)
 				memcache.set(key, pairs)
 			except:
 				pass
 	
-	@staticmethod
-	def updateMultiDbAndCache(pairs, category_key):
-		db.put(pairs)
-		key = str(category_key) + "reviewPairs"
-		cached = memcache.get(key)
-		if cached is not None:
-			for pair in pairs:
-				tempPairs = [p for p in cached if str(pair.key()) == str(p.key())]
-				if len(tempPairs) > 1:
-					print "should only match one but matches %d" % len(tempPairs)
-				try:
-					cached.remove(tempPairs[0])
-					cached.append(pair)
-				except:
-					pass
-			memcache.set(key, cached)
+	def insertAfterMissed(self, pairs):
+		for i in range(length(pairs)):
+			if pairs.state == 'ready':
+				pairs.insert(i, self)
+				break
 	
 	def updateMisses(self):
 		self.numSuccesses -= 2;
@@ -73,11 +62,12 @@ class Pair(db.Model):
 		self.lastSuccess = today
 		self.setNextReview()
 	
-	def setState(self, state, reviewing):
-		if reviewing:
-			self.reviewState = state
+	def setState(self, state):
+		self.state = state
+		if state == 'missed':
+			self.updateMisses()
 		else:
-			self.state = state
+			self.updateSuccesses()
 	
 	def setNextReview(self):
 		n = self.numSuccesses

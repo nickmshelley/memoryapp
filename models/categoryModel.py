@@ -69,5 +69,5 @@ class Category(db.Model):
 			#for pair in pairs:
 			#	print "%s-%d" % (pair.state, (pair.numSuccesses - (date - pair.nextReviewDate).days))
 			
-			memcache.set(key, pairs)
+			memcache.set(key, pairs[:500])
 		return pairs

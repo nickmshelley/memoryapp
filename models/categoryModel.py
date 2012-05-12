@@ -41,7 +41,7 @@ class Category(db.Model):
 		if len(pairs) == 0:
 			pair = None
 		else:
-			index = int(random.random() * len(pairs))
+			index = int((pow(random.random(), 2) * len(pairs))
 			pair = pairs[index]
 		return pair
 	

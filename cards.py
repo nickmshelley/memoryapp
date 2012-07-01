@@ -11,6 +11,14 @@ from controllers.userPreferencesController import *
 
 class MainPage(webapp.RequestHandler):
 	def get(self):
+		pairs = Pair.all()
+		today = datetime.datetime.now().date()
+		for p in pairs:
+			p.nextReverseReviewDate = today
+			p.reverseState = 'ready'
+			p.reverseNumSuccesses = 0
+			p.put()
+		
 		user = users.get_current_user()
 		categoryQuery = Category.all().filter('owner =', user)
 		categoryQuery.order('name')

@@ -55,9 +55,9 @@ class EditPairAction(webapp.RequestHandler):
 		pair = db.get(pair_key)
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
-		pair.updateDbAndCache(category_key)
-		#refresh cache to show update
 		category = db.get(category_key)
+		pair.updateDbAndCache(category_key, category.reverse)
+		#refresh cache to show update
 		memcache.delete(category.getReviewPairsKey())
 		self.redirect('/category?id=' + category_key + ';pair=' + pair_key)
 

@@ -27,6 +27,7 @@ class AddPairAction(webapp.RequestHandler):
 		pair.question = self.request.get('question')
 		pair.answer = self.request.get('answer')
 		pair.nextReviewDate = today
+		pair.nextReverseReviewDate = today
 		pair.categories.append(db.Key(category_key))
 		pair.put()
 		self.redirect('/view-stats?category=' + category_key)
@@ -73,10 +74,14 @@ class UpdatePairAction(webapp.RequestHandler):
 		pair_key = self.request.get('pair')
 		state = self.request.get('state')
 		category_key = self.request.get('category')
+		reverseString = self.request.get('reverse')
+		reverse = False
+		if reverseString == 'True':
+			reverse = True
 		pair = db.get(pair_key)
 		
-		pair.setState(state)
-		pair.updateDbAndCache(category_key)
+		pair.setState(state, reverse)
+		pair.updateDbAndCache(category_key, reverse)
 		self.redirect('/category?id=' + category_key)
 
 #hack to fix circular import

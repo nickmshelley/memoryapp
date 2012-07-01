@@ -18,6 +18,11 @@ indexes:
 - kind: Pair
   properties:
   - name: categories
+  - name: nextReverseReviewDate
+
+- kind: Pair
+  properties:
+  - name: categories
   - name: nextReviewDate
 
 - kind: Pair

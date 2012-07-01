@@ -4,6 +4,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.api import memcache
 import os
+import re
 import random
 from models.categoryModel import *
 
@@ -16,7 +17,6 @@ class CategoryPage(webapp.RequestHandler):
 		pairKey = self.request.get('pair')
 		showAnswer = self.request.get('show-answer')
 		error_message = None
-		category = None
 		category = db.get(category_key)
 		path = os.path.join(os.path.dirname(__file__), '../templates/category.html')
 		pair = None
@@ -26,18 +26,35 @@ class CategoryPage(webapp.RequestHandler):
 			pair = category.nextPair
 		if pair is None:
 			self.redirect('/view-stats?category=' + str(category.key()))
-		remaining = category.remaining
-		self.response.out.write(template.render(path, {'pair': pair,
-														'category': category,
-														'remaining': remaining,
-														'show_answer': showAnswer,
-														'logout': logout,
-														}))
+		else:
+			remaining = category.remaining
+			answer = pair.answer
+			if category.reverse:
+				answer = re.sub(r'\d+', '', answer)
+			self.response.out.write(template.render(path, {'pair': pair,
+															'answer': answer,
+															'reverse': category.reverse,
+															'category': category,
+															'remaining': remaining,
+															'show_answer': showAnswer,
+															'logout': logout,
+															}))
 
 class StartReviewAction(webapp.RequestHandler):
 	def get(self):
 		category_key = self.request.get('id')
 		category = db.get(category_key)
+		category.reverse = False
+		db.put(category)
+		memcache.delete(category.getReviewPairsKey())
+		self.redirect('category?id=' + category_key)
+
+class StartReverseReviewAction(webapp.RequestHandler):
+	def get(self):
+		category_key = self.request.get('id')
+		category = db.get(category_key)
+		category.reverse = True
+		db.put(category)
 		memcache.delete(category.getReviewPairsKey())
 		self.redirect('category?id=' + category_key)
 
@@ -135,7 +152,8 @@ class ViewStats(webapp.RequestHandler):
 		pairs = category.allPairs
 		total = len(pairs)
 		reviewTotal = len(filter(lambda x: x.nextReviewDate <= today, pairs))
-		totals = {'total': total, 'reviewTotal': reviewTotal}
+		reverseTotal = len(filter(lambda x: x.nextReverseReviewDate <= today, pairs))
+		totals = {'total': total, 'reviewTotal': reviewTotal, 'reverseTotal': reverseTotal}
 		reviewLevel = {}
 		days = {}
 		averages = {}
@@ -166,11 +184,46 @@ class ViewStats(webapp.RequestHandler):
 			for n in days.keys():
 				numCards += days[n] / float(n)
 			averages['cards'] = numCards
+		
+		#same for reverse
+		reverseReviewLevel = {}
+		reverseDays = {}
+		reverseAverages = {}
+		reverseReviewLevelList = []
+		if len(pairs) > 0:
+			for n in range(max(pairs, key=lambda x: x.reverseNumSuccesses).reverseNumSuccesses + 1):
+				reverseReviewLevel[n] = filter(lambda x: x.reverseNumSuccesses == n, pairs)
+			dayAveTotal = 0
+			daysTotal = 0.0
+			for n in reverseReviewLevel.keys():
+				#review level stuff
+				l = reverseReviewLevel[n]
+				num = len(l)
+				reverseReviewLevelList.append((n, num, 
+												len(filter(lambda x: x.nextReverseReviewDate <= today, l)),
+												len(filter(lambda x: x.nextReverseReviewDate > today, l))))
+				dayAveTotal += num * n
+				#days stuff
+				delta = int(pow(1.1, n))
+				if not delta in reverseDays:
+					reverseDays[delta] = num
+				else:
+					reverseDays[delta] += num
+				daysTotal += delta * float(num)
+			reverseAverages['reviewLevel'] = dayAveTotal / float(total)
+			reverseAverages['days'] = daysTotal / float(total)
+			numCards = 0.0
+			for n in reverseDays.keys():
+				numCards += reverseDays[n] / float(n)
+			reverseAverages['cards'] = numCards
 		path = os.path.join(os.path.dirname(__file__), '../templates/view_stats.html')
 		self.response.out.write(template.render(path, {'logout': logout,
 														'totals': totals,
 														'reviewLevel': reviewLevelList,
 														'days': days,
 														'averages': averages,
+														'reverseReviewLevel': reverseReviewLevelList,
+														'reverseDays': reverseDays,
+														'reverseAverages': reverseAverages,
 														'category': category,
 														}))

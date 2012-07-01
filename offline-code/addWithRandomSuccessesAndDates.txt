@@ -17,8 +17,10 @@ for i in range(toAdd):
 	pair.question = "%d" % i
 	pair.answer = "%d" % (i + 1)
 	pair.numSuccesses = randint(0, 50)
+	pair.reverseNumSuccesses = randint(0, 50)
 	now = datetime.datetime.now()
 	today = now.date()
 	pair.nextReviewDate = today + datetime.timedelta(days=(randint(-50, 50)))
+	pair.nextReverseReviewDate = today + datetime.timedelta(days=(randint(-50, 50)))
 	pair.categories.append(db.Key(category_key))
 	pair.put()

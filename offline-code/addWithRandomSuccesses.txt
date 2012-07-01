@@ -19,6 +19,5 @@ for i in range(toAdd):
 	pair.categories.append(db.Key(category_key))
 	pair.put()
 	category = db.get(category_key)
-	category.total += 1
 	category.remaining += 1
 	category.put()

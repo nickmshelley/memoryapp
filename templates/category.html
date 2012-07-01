@@ -14,11 +14,20 @@
 {% endblock nav %}
 
 {% block content %}
-	<p><em>Question:</em></p>
-	<p>{{ pair.question|linebreaksbr }}</p>
-	{% if show_answer %}
+	{% if reverse %}
+		<p><em>Question:</em></p>
+		{% if show_answer %}
+			<p>{{ pair.question|linebreaksbr }}</p>
+		{% endif %}
 		<p><em>Answer:</em></p>
-		<p>{{ pair.answer|linebreaksbr }}</p>
+		<p>{{ answer|linebreaksbr }}</p>
+	{% else %}
+		<p><em>Question:</em></p>
+		<p>{{ pair.question|linebreaksbr }}</p>
+		{% if show_answer %}
+			<p><em>Answer:</em></p>
+			<p>{{ answer|linebreaksbr }}</p>
+		{% endif %}
 	{% endif %}
 	
 	{% if pair %}
@@ -27,12 +36,14 @@
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="ready" />
+			<input type="hidden" name="reverse" value="{{ category.reverse }}" />
 			<input type="hidden" name="category" value="{{ category.key }}" />
 			<input type="submit" value="Correct" />
 		</form>
 		<form action="/update-pair" method="post">
 			<input type="hidden" name="pair" value="{{ pair.key }}" />
 			<input type="hidden" name="state" value="missed" />
+			<input type="hidden" name="reverse" value="{{ category.reverse }}" />
 			<input type="hidden" name="category" value="{{ category.key }}" />
 			<input type="submit" value="Missed" />
 		</form>

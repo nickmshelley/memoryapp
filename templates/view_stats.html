@@ -7,6 +7,7 @@
 {% block nav %}
 	<p>
 		<a href="/start-review?id={{ category.key }}">Review Cards</a>
+		<a href="/start-reverse?id={{ category.key }}">Review Reverse</a>
 		<a href="/view-stats?category={{ category.key }}">Category Stats</a>
 		<a href="/view-pairs?category={{ category.key }}">View Cards</a>
 		<a href="/new-pair?category={{ category.key }}">New Card</a>
@@ -16,9 +17,11 @@
 {% block content %}
 	<p>
 		Total Cards in Category: {{ totals.total }}<br />
+	</p>
+	<h2>Normal Review</h2>
+	<p>
 		Cards Ready to Review: {{ totals.reviewTotal }}
 	</p>
-
 	<p>
 		<h3>Review Level</h3>
 	</p>
@@ -58,10 +61,62 @@
 		<tr>
 			<td>Day Difference</td>
 			<td>Total</td>
-			<!--<td>Needs Review</td>
-			<td>Future Review</td>-->
 		</tr>
 		{% for key in days.items %}
+		<tr>
+			<td>{{ key.0 }}</td>
+			<td>{{ key.1 }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	
+	<br /><hr />
+	
+	<h2>Reverse Review</h2>
+	<p>
+		Cards Ready to Review: {{ totals.reverseTotal }}
+	</p>
+	<p>
+		<h3>Review Level</h3>
+	</p>
+	<p>Note: Review level determines when the next review date will be (the higher the number, the later
+	the next review date will be).
+	</p>
+	<p>
+		Average review level: {{ reverseAverages.reviewLevel|floatformat }}
+	</p>
+	<table border="1">
+		<tr>
+			<td>Review Level</td>
+			<td>Total</td>
+			<td>Needs Review</td>
+			<td>Future Review</td>
+		</tr>
+		{% for t in reverseReviewLevel %}
+		<tr>
+			<td>{{ t.0 }}</td>
+			<td>{{ t.1 }}</td>
+			<td>{{ t.2 }}</td>
+			<td>{{ t.3 }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	
+	<p>
+		<h3>Days Between Reviews</h3>
+	</p>
+	<p>
+		Average number of days between reviews: {{ reverseAverages.days|floatformat }}
+	</p>
+	<p>
+		Average cards to review per day: {{ reverseAverages.cards|floatformat }}
+	</p>
+	<table border="1">
+		<tr>
+			<td>Day Difference</td>
+			<td>Total</td>
+		</tr>
+		{% for key in reverseDays.items %}
 		<tr>
 			<td>{{ key.0 }}</td>
 			<td>{{ key.1 }}</td>

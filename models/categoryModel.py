@@ -9,6 +9,7 @@ class Category(db.Model):
 	name = db.StringProperty()
 	owner = db.UserProperty(required = True)
 	description = db.TextProperty()
+	reverse = db.BooleanProperty()
 	
 	def getReviewPairsKey(self):
 		return str(self.key()) + "reviewPairs"
@@ -56,21 +57,27 @@ class Category(db.Model):
 			date = now.date() # get rid of time information
 			
 			query = Pair.all().filter('categories =', self.key())
-			query.filter('nextReviewDate <=', date)
+			if self.reverse:
+				query.filter('nextReverseReviewDate <=', date)
+			else:
+				query.filter('nextReviewDate <=', date)
 			pairs = self.getAllFromQuery(query)
 			
 			#sort by numsuccesses minus how-many-days-past-review-date
 			def compare(pair):
-				num = (pair.numSuccesses - (date - pair.nextReviewDate).days)
-				if pair.state == 'missed':
-					num -= 1000
+				num = 0
+				if self.reverse:
+					num = (pair.reverseNumSuccesses - (date - pair.nextReverseReviewDate).days)
+					if pair.reverseState == 'missed':
+						num -= 1000
+				else:
+					num = (pair.numSuccesses - (date - pair.nextReviewDate).days)
+					if pair.state == 'missed':
+						num -= 1000
 				return num
 			pairs.sort(key = compare)
 			
-			#for pair in pairs:
-			#	print "%s-%d" % (pair.state, (pair.numSuccesses - (date - pair.nextReviewDate).days))
-			
-			#to avoid memcache size limit
-			pairs = pairs[:500]
+			#algorithm works better with fewer pairs
+			pairs = pairs[:300]
 			memcache.set(key, pairs)
 		return pairs

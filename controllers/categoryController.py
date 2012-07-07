@@ -30,7 +30,7 @@ class CategoryPage(webapp.RequestHandler):
 			remaining = category.remaining
 			answer = pair.answer
 			if category.reverse:
-				answer = re.sub(r'\d+', '', answer)
+				answer = re.sub(r'\d+\.*', '', answer)
 			self.response.out.write(template.render(path, {'pair': pair,
 															'answer': answer,
 															'reverse': category.reverse,

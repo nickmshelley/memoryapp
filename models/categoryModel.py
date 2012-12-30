@@ -67,17 +67,23 @@ class Category(db.Model):
 			def compare(pair):
 				num = 0
 				if self.reverse:
-					num = (pair.reverseNumSuccesses - (date - pair.nextReverseReviewDate).days)
+					dayDiff = 0
+					if pair.lastReverseSuccess is not None:
+						dayDiff = (pair.nextReverseReviewDate - pair.lastReverseSuccess).days
+					num = (pair.reverseNumSuccesses + dayDiff - (date - pair.nextReverseReviewDate).days)
 					if pair.reverseState == 'missed':
 						num -= 1000
 				else:
-					num = (pair.numSuccesses - (date - pair.nextReviewDate).days)
+					dayDiff = 0
+					if pair.lastSuccess is not None:
+						dayDiff = (pair.nextReviewDate - pair.lastSuccess).days
+					num = (pair.numSuccesses + dayDiff - (date - pair.nextReviewDate).days)
 					if pair.state == 'missed':
 						num -= 1000
 				return num
 			pairs.sort(key = compare)
 			
 			#algorithm works better with fewer pairs
-			pairs = pairs[:300]
+			pairs = pairs[:200]
 			memcache.set(key, pairs)
 		return pairs
